@@ -56,16 +56,14 @@ class MenuItem(models.Model):
 # ------------------------------------------------------------
 class Order(models.Model):
     class Status(models.TextChoices):
-        IN_PROGRESS = "in_progress", "In Progress"
+        PREPARING = "preparing", "Preparing"
         READY       = "ready",       "Ready"
-        DELIVERED   = "delivered",   "Delivered"
-        CANCELLED   = "cancelled",   "Cancelled"
 
-    table_number = models.PositiveIntegerField()
+    table_number = models.PositiveIntegerField(default=1)
     order_status = models.CharField(
         max_length=15,
         choices=Status.choices,
-        default=Status.IN_PROGRESS,
+        default=Status.PREPARING,
     )
     priority   = models.PositiveIntegerField(default=1)
     created_by = models.ForeignKey(

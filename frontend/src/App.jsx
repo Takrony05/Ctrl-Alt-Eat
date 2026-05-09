@@ -1,23 +1,22 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Dashboard from './pages/Dashboard';
-import CreateOrder from './pages/CreateOrder';
-import OrderHistory from './pages/OrderHistory';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
 
-function App() {
+// Pages
+import CheckoutPage       from './pages/CheckoutPage';
+import OrderTrackingPage  from './pages/OrderTrackingPage';
+
+export default function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="container mx-auto py-8 px-4">
+    <CartProvider>
+      <div className="min-h-screen bg-gray-900">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/create" element={<CreateOrder />} />
-          <Route path="/history" element={<OrderHistory />} />
+          <Route path="/" element={<Navigate to="/checkout" replace />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/tracking/:orderId" element={<OrderTrackingPage />} />
+          <Route path="*" element={<Navigate to="/checkout" replace />} />
         </Routes>
-      </main>
-    </div>
+      </div>
+    </CartProvider>
   );
 }
-
-export default App;

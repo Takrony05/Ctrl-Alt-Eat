@@ -1,13 +1,8 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views.order_views import OrderViewSet, MenuItemViewSet
-from .views.dashboard_views import DashboardViewSet
-
-router = DefaultRouter()
-router.register(r'orders', OrderViewSet, basename='order')
-router.register(r'menu-items', MenuItemViewSet, basename='menu-item')
-router.register(r'dashboard', DashboardViewSet, basename='dashboard')
+from django.urls import path
+from .views.order_views import create_order
+from .views.status_views import get_order_status
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('orders/', create_order, name='create-order'),
+    path('orders/<int:pk>/', get_order_status, name='order-status'),
 ]

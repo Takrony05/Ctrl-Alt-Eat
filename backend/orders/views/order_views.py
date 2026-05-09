@@ -1,11 +1,13 @@
-from rest_framework import viewsets
-from ..models import Order, MenuItem
-from ..serializers import OrderSerializer, MenuItemSerializer
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from ..serializers import OrderSerializer
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all().prefetch_related('items__menu_item')
-    serializer_class = OrderSerializer
-
-class MenuItemViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = MenuItem.objects.all()
-    serializer_class = MenuItemSerializer
+@api_view(['POST'])
+def create_order(request):
+    """POST /api/orders/ — accepts the cart payload and creates an Order."""
+    serializer = OrderSerializer(data=request.data)
+    if serializer.is_valid():
+        order = serializer.save()
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
