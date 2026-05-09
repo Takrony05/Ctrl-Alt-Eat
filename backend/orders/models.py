@@ -7,15 +7,15 @@ from django.db import models
 # ------------------------------------------------------------
 class User(AbstractUser):
     class Role(models.TextChoices):
-        ADMIN   = "admin",   "Admin"
-        WAITER  = "waiter",  "Waiter"
-        CHEF    = "chef",    "Chef"
-        CASHIER = "cashier", "Cashier"
+        ADMIN    = "admin",    "Admin"
+        CUSTOMER = "customer", "Customer"
+        CHEF     = "chef",     "Chef"
+        CASHIER  = "cashier",  "Cashier"
 
     role = models.CharField(
         max_length=10,
         choices=Role.choices,
-        default=Role.WAITER,
+        default=Role.CUSTOMER,
     )
     # Added name field as used in __str__
     name = models.CharField(max_length=255, blank=True)
@@ -26,14 +26,26 @@ class User(AbstractUser):
 
 
 # ------------------------------------------------------------
+# Add-ons
+# ------------------------------------------------------------
+class AddOn(models.Model):
+    name  = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.name} (+${self.price})"
+
+
+# ------------------------------------------------------------
 # Menu Items
 # ------------------------------------------------------------
 class MenuItem(models.Model):
-    name        = models.CharField(max_length=255)
-    description = models.TextField(blank=True, default="")
-    category    = models.CharField(max_length=100)
-    price       = models.DecimalField(max_digits=8, decimal_places=2)
-    created_at  = models.DateTimeField(auto_now_add=True)
+    name             = models.CharField(max_length=255)
+    description      = models.TextField(blank=True, default="")
+    category         = models.CharField(max_length=100) # e.g. "Main Meal", "Dessert", "Drink"
+    price            = models.DecimalField(max_digits=8, decimal_places=2)
+    available_addons = models.ManyToManyField(AddOn, blank=True, related_name="menu_items")
+    created_at       = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} — {self.category} (${self.price})"
@@ -90,9 +102,10 @@ class OrderItem(models.Model):
         on_delete=models.PROTECT,
         related_name="order_items",
     )
-    quantity  = models.PositiveIntegerField(default=1)
-    notes     = models.TextField(blank=True, default="")
-    created_at = models.DateTimeField(auto_now_add=True)
+    quantity         = models.PositiveIntegerField(default=1)
+    selected_addons  = models.ManyToManyField(AddOn, blank=True, related_name="order_items")
+    notes            = models.TextField(blank=True, default="")
+    created_at       = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.quantity}x {self.menu_item.name} (Order #{self.order_id})"
