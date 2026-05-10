@@ -45,10 +45,18 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.all().prefetch_related(
+        qs = Order.objects.prefetch_related(
             'items__menu_item',
             'items__selected_addons',
         ).select_related('created_by')
+
+        user = self.request.user
+        # Staff, superusers, and chefs see all orders (needed for KDS / Dashboard)
+        if user.is_staff or user.is_superuser or getattr(user, 'role', None) == 'chef':
+            return qs.all()
+
+        # Regular customers only see their own orders
+        return qs.filter(created_by=user)
 
     def get_serializer_class(self):
         if self.action == 'create':
