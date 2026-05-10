@@ -27,10 +27,17 @@ export const getMenuItems = () => api.get('/menu-items/');
 
 // ── Orders ────────────────────────────────────────────────
 export const getOrders        = ()           => api.get('/orders/');
+export const getOrderById     = (id)         => api.get(`/orders/${id}/`);
 export const placeOrder       = (data)       => api.post('/orders/', data);
 export const updateOrderStatus = (id, data)  => api.patch(`/orders/${id}/`, data);
 
 // ── Dashboard ─────────────────────────────────────────────
 export const getDashboard = () => api.get('/dashboard/');
+
+// Compatibility alias for order_tracking-feat
+export const orderAPI = {
+  create: placeOrder,
+  getById: getOrderById,
+};
 
 export default api;

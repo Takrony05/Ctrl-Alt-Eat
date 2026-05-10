@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.contrib.auth import authenticate
+from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from .models import User, MenuItem, Order, OrderItem, AddOn
 
@@ -121,10 +121,10 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         items_data = validated_data.pop('items')
         order = Order.objects.create(**validated_data)
         for item_data in items_data:
-            selected_addons = item_data.pop('selected_addons', [])
+            addons = item_data.pop('selected_addons', [])
             item = OrderItem.objects.create(order=order, **item_data)
-            if selected_addons:
-                item.selected_addons.set(selected_addons)
+            if addons:
+                item.selected_addons.set(addons)
         return order
 
 
@@ -132,11 +132,14 @@ class OrderSerializer(serializers.ModelSerializer):
     """Full read-only representation of an order (used by dashboard & customer)."""
     items = OrderItemDetailSerializer(many=True, read_only=True)
     created_by_name = serializers.SerializerMethodField()
+    
+    # Maintain compatibility with order_tracking-feat by aliasing order_status as status
+    status = serializers.CharField(source='order_status', read_only=True)
 
     class Meta:
         model = Order
         fields = [
-            'id', 'table_number', 'order_status', 'priority',
+            'id', 'table_number', 'order_status', 'status', 'priority',
             'created_by', 'created_by_name', 'items', 'created_at',
         ]
 

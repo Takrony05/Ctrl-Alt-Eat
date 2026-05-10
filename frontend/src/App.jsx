@@ -14,6 +14,10 @@ import OrderPlaced  from './pages/OrderPlaced';
 import Dashboard    from './pages/Dashboard';
 import OrderHistory from './pages/OrderHistory';
 
+// Pages from order_tracking-feat
+import CheckoutPage       from './pages/CheckoutPage';
+import OrderTrackingPage  from './pages/OrderTrackingPage';
+
 import { useOrderSocket } from './hooks/useOrderSocket';
 
 // ─── Protected Route wrapper ──────────────────────────────
@@ -59,7 +63,7 @@ function AppInner() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-900">
       <Navbar />
       <main>
         <Routes>
@@ -75,6 +79,16 @@ function AppInner() {
           <Route path="/cart" element={
             <ProtectedRoute allowedRoles={['customer']}>
               <Cart />
+            </ProtectedRoute>
+          } />
+          <Route path="/checkout" element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <CheckoutPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/tracking/:orderId" element={
+            <ProtectedRoute>
+              <OrderTrackingPage />
             </ProtectedRoute>
           } />
           <Route path="/order-placed" element={
