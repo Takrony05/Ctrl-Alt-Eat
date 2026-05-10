@@ -13,7 +13,7 @@ export default function Login() {
 
   // Already logged in
   if (!loading && user) {
-    return <Navigate to={user.role === 'chef' ? '/chef' : '/menu'} replace />;
+    return <Navigate to={user.role === 'chef' ? '/kitchen-dashboard' : '/menu'} replace />;
   }
 
   const handleChange = (e) => {
@@ -32,7 +32,7 @@ export default function Login() {
       } else {
         loggedInUser = await signup(form);
       }
-      navigate(loggedInUser.role === 'chef' ? '/chef' : '/menu', { replace: true });
+      navigate(loggedInUser.role === 'chef' ? '/kitchen-dashboard' : '/menu', { replace: true });
     } catch (err) {
       const data = err?.response?.data;
       if (data) {
