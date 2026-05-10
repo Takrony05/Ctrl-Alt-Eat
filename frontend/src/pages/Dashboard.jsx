@@ -1,41 +1,53 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import KitchenBoard from '../components/KitchenBoard';
-import { getDashboard } from '../services/api';
+import { getKitchenOrders, updateOrderStatus } from '../services/api';
+
+// Active statuses that should appear on the chef's dashboard
+const ACTIVE_STATUSES = ['in_progress', 'ready'];
 
 export default function Dashboard() {
-  const [orders, setOrders]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState('');
+  const [orders, setOrders]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState('');
   const [lastPoll, setLastPoll] = useState(null);
 
   const fetchOrders = useCallback(() => {
-    getDashboard()
+    getKitchenOrders()
       .then((res) => {
-        // DRF router returns array; dashboard is a ReadOnlyModelViewSet list
-        setOrders(Array.isArray(res.data) ? res.data : res.data.results || []);
+        const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+        // Double-filter on the frontend as a safety guard
+        setOrders(data.filter((o) => ACTIVE_STATUSES.includes(o.order_status)));
         setLastPoll(new Date());
         setError('');
       })
-      .catch(() => setError('Could not load orders.'))
+      .catch(() => setError('Failed to load kitchen orders.'))
       .finally(() => setLoading(false));
   }, []);
 
-  // Initial load + poll every 10 seconds
+  // Initial load + auto-refresh every 5 seconds
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 10000);
+    const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
-  const handleStatusChange = useCallback((updatedOrder) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
-        .filter((o) => o.order_status === 'preparing' || o.order_status === 'ready')
-    );
-  }, []);
+  /**
+   * Called by StatusButtons when a chef clicks Mark as Ready or Mark as Delivered.
+   * Sends the PATCH, then re-fetches so the board reflects server truth.
+   * Delivered orders will naturally drop out because they no longer pass
+   * the ACTIVE_STATUSES filter (and the backend excludes them too).
+   */
+  const handleStatusChange = useCallback(async (orderId, newStatus) => {
+    try {
+      await updateOrderStatus(orderId, { order_status: newStatus });
+      fetchOrders(); // re-fetch immediately after update
+    } catch {
+      alert('Failed to update order status. Please try again.');
+    }
+  }, [fetchOrders]);
 
-  const pendingCount = orders.filter((o) => o.order_status === 'preparing').length;
-  const readyCount   = orders.filter((o) => o.order_status === 'ready').length;
+  const inProgressCount = orders.filter((o) => o.order_status === 'in_progress').length;
+  const readyCount      = orders.filter((o) => o.order_status === 'ready').length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -48,7 +60,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           {/* Stats chips */}
           <div className="flex gap-2">
-            <span className="stat-chip stat-pending">{pendingCount} In Progress</span>
+            <span className="stat-chip stat-pending">{inProgressCount} In Progress</span>
             <span className="stat-chip stat-ready">{readyCount} Ready</span>
           </div>
           {/* Live indicator */}
@@ -66,7 +78,7 @@ export default function Dashboard() {
         </p>
       )}
 
-      {/* Error */}
+      {/* Error banner */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-600 rounded-2xl p-4 mb-6 text-sm">
           {error}

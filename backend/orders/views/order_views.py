@@ -78,13 +78,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
-        """PATCH /api/orders/{id}/ — Chef marks order as ready."""
+        """PATCH /api/orders/{id}/ — Chef updates order status."""
         order = self.get_object()
         serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        order = serializer.save()  # re-assign to get fresh instance
 
-        # If order is now 'ready', broadcast WebSocket event
+        # Broadcast WebSocket event when order becomes ready
         if order.order_status == Order.Status.READY:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
