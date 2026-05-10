@@ -35,13 +35,13 @@ function ItemCard({ item, onAdd }) {
   return (
     <div className="menu-card group">
       {/* Category badge */}
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="font-bold text-gray-900 text-base leading-snug">{item.name}</h3>
-        <span className="text-lg ml-2 flex-shrink-0">{CATEGORY_ICONS[item.category] || '🍽️'}</span>
+      <div className="flex items-start justify-between mb-4">
+        <h3 className="font-bold text-white text-lg leading-snug">{item.name}</h3>
+        <span className="text-2xl ml-3 flex-shrink-0">{CATEGORY_ICONS[item.category] || '🍽️'}</span>
       </div>
 
       {item.description && (
-        <p className="text-gray-500 text-sm mb-3 line-clamp-2">{item.description}</p>
+        <p className="text-white/50 text-sm mb-5 line-clamp-2 leading-relaxed">{item.description}</p>
       )}
 
       {/* Add-ons */}
@@ -100,20 +100,20 @@ export default function CreateOrder() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-gray-900">Our Menu</h1>
-        <p className="text-gray-500 mt-1">Choose from our fresh selection</p>
+      <div className="mb-8">
+        <h1 className="text-4xl font-black tracking-tight text-white">Our Menu</h1>
+        <p className="text-white/50 mt-2 font-medium">Fresh flavors delivered to your table.</p>
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-2xl w-fit">
+      <div className="flex gap-2 mb-8 bg-white/5 p-1.5 rounded-[20px] w-fit border border-white/10 backdrop-blur-md">
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}
             className={`tab-btn ${activeTab === cat ? 'tab-btn-active' : ''}`}
           >
-            <span className="mr-1.5">{CATEGORY_ICONS[cat]}</span>
+            <span className="mr-2 text-base">{CATEGORY_ICONS[cat]}</span>
             {cat}
           </button>
         ))}
