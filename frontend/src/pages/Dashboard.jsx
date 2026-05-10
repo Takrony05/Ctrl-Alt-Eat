@@ -30,11 +30,11 @@ export default function Dashboard() {
   const handleStatusChange = useCallback((updatedOrder) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
-        .filter((o) => o.order_status === 'in_progress' || o.order_status === 'ready')
+        .filter((o) => o.order_status === 'preparing' || o.order_status === 'ready')
     );
   }, []);
 
-  const pendingCount = orders.filter((o) => o.order_status === 'in_progress').length;
+  const pendingCount = orders.filter((o) => o.order_status === 'preparing').length;
   const readyCount   = orders.filter((o) => o.order_status === 'ready').length;
 
   return (

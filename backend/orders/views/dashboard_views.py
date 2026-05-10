@@ -17,7 +17,7 @@ class DashboardViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return (
             Order.objects
-            .filter(order_status__in=[Order.Status.IN_PROGRESS, Order.Status.READY])
+            .filter(order_status__in=[Order.Status.PREPARING, Order.Status.READY])
             .prefetch_related('items__menu_item', 'items__selected_addons')
             .select_related('created_by')
             .order_by('created_at')  # FIFO

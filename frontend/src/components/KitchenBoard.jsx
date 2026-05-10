@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import StatusButtons from './StatusButtons';
 
 const STATUS_COLORS = {
-  in_progress: 'bg-amber-100 text-amber-700 border-amber-200',
+  preparing: 'bg-amber-100 text-amber-700 border-amber-200',
   ready:       'bg-emerald-100 text-emerald-700 border-emerald-200',
   delivered:   'bg-sky-100 text-sky-700 border-sky-200',
   cancelled:   'bg-red-100 text-red-700 border-red-200',
 };
 
 const STATUS_LABELS = {
-  in_progress: '⏳ In Progress',
+  preparing: '⏳ Preparing',
   ready:       '✅ Ready',
   delivered:   '📦 Delivered',
   cancelled:   '❌ Cancelled',

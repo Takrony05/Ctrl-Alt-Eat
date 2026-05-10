@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { placeOrder } from '../services/api';
+import PaymentOptions from '../components/PaymentOptions';
 
 export default function Cart() {
   const { cartItems, removeFromCart, decrementItem, addToCart, clearCart, grandTotal, totalItems } = useCart();
@@ -12,6 +13,7 @@ export default function Cart() {
   const [tableNumber, setTableNumber] = useState(1);
   const [submitting, setSubmitting]   = useState(false);
   const [error, setError]             = useState('');
+  const [payMethod, setPayMethod]     = useState('card');
 
   const handlePlaceOrder = async () => {
     if (cartItems.length === 0) return;
@@ -115,6 +117,12 @@ export default function Cart() {
             </div>
           );
         })}
+      </div>
+
+      {/* Payment Options */}
+      <div className="mb-6">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 ml-1">Payment Method</h2>
+        <PaymentOptions selected={payMethod} onSelect={setPayMethod} />
       </div>
 
       {/* Summary */}

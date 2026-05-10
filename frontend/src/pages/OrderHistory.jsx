@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { getOrders } from '../services/api';
 
 const STATUS_STYLE = {
-  in_progress: 'bg-amber-100 text-amber-700',
+  preparing: 'bg-amber-100 text-amber-700',
   ready:       'bg-emerald-100 text-emerald-700',
   delivered:   'bg-sky-100 text-sky-700',
   cancelled:   'bg-red-100 text-red-700',
 };
 
 const STATUS_LABEL = {
-  in_progress: '⏳ In Progress',
+  preparing: '⏳ Preparing',
   ready:       '✅ Ready',
   delivered:   '📦 Delivered',
   cancelled:   '❌ Cancelled',
