@@ -110,11 +110,7 @@ function AppInner() {
           } />
 
           {/* Redirects */}
-          <Route path="/" element={
-            user
-              ? <Navigate to={user.role === 'chef' ? '/chef' : '/menu'} replace />
-              : <Navigate to="/login" replace />
-          } />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
