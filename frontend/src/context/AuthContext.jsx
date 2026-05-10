@@ -1,49 +1,111 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, signup as apiSignup, logout as apiLogout, getMe } from '../services/api';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
+const ACCOUNTS_KEY = 'kds_accounts';
+const USER_KEY = 'kds_user';
+const TOKEN_KEY = 'kds_token';
+
+function getRoleFromEmail(email) {
+  return email.trim().toLowerCase().endsWith('@ejust.edu.eg') ? 'chef' : 'customer';
+}
+
+function normalizeEmail(email) {
+  return email.trim().toLowerCase();
+}
+
+function createUser(email) {
+  const cleanEmail = normalizeEmail(email);
+  return {
+    email: cleanEmail,
+    name: cleanEmail.split('@')[0],
+    role: getRoleFromEmail(cleanEmail),
+  };
+}
+
+function readAccounts() {
+  try {
+    return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || {};
+  } catch (_) {
+    return {};
+  }
+}
+
+function saveSession(nextUser) {
+  const nextToken = `demo-token-${Date.now()}`;
+  localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+  localStorage.setItem(TOKEN_KEY, nextToken);
+  return nextToken;
+}
+
+function createAuthError(message, code) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
-  const [token, setToken]     = useState(() => localStorage.getItem('kds_token'));
-  const [loading, setLoading] = useState(true);
-
-  // Restore session on mount
-  useEffect(() => {
-    if (token) {
-      getMe()
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          localStorage.removeItem('kds_token');
-          setToken(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem(USER_KEY);
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (_) {
+      return null;
     }
-  }, [token]);
+  });
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
+  const [loading] = useState(false);
 
-  const login = useCallback(async (credentials) => {
-    const res = await apiLogin(credentials);
-    const { token: tok, user: u } = res.data;
-    localStorage.setItem('kds_token', tok);
-    setToken(tok);
-    setUser(u);
-    return u;
+  const login = useCallback(async ({ email, password }) => {
+    const cleanEmail = normalizeEmail(email);
+    const accounts = readAccounts();
+    const account = accounts[cleanEmail];
+
+    if (!account) {
+      throw createAuthError('Account not found. Please sign up first.', 'ACCOUNT_NOT_FOUND');
+    }
+
+    if (account.password !== password) {
+      throw createAuthError('Incorrect password. Please try again.', 'INVALID_PASSWORD');
+    }
+
+    const nextUser = createUser(cleanEmail);
+    const nextToken = saveSession(nextUser);
+    setUser(nextUser);
+    setToken(nextToken);
+
+    return nextUser;
   }, []);
 
-  const signup = useCallback(async (data) => {
-    const res = await apiSignup(data);
-    const { token: tok, user: u } = res.data;
-    localStorage.setItem('kds_token', tok);
-    setToken(tok);
-    setUser(u);
-    return u;
+  const signup = useCallback(async ({ email, password }) => {
+    const cleanEmail = normalizeEmail(email);
+    const accounts = readAccounts();
+
+    if (accounts[cleanEmail]) {
+      throw createAuthError('Account already exists. Please log in.', 'ACCOUNT_EXISTS');
+    }
+
+    const nextUser = createUser(cleanEmail);
+    const nextAccounts = {
+      ...accounts,
+      [cleanEmail]: {
+        email: cleanEmail,
+        password,
+        role: nextUser.role,
+        createdAt: new Date().toISOString(),
+      },
+    };
+
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(nextAccounts));
+    const nextToken = saveSession(nextUser);
+    setUser(nextUser);
+    setToken(nextToken);
+
+    return nextUser;
   }, []);
 
   const logout = useCallback(async () => {
-    try { await apiLogout(); } catch (_) {}
-    localStorage.removeItem('kds_token');
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setUser(null);
   }, []);
