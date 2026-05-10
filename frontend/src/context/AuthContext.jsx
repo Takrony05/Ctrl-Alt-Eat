@@ -1,48 +1,45 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, signup as apiSignup, logout as apiLogout, getMe } from '../services/api';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 
 const AuthContext = createContext(null);
 
+function getRoleFromEmail(email) {
+  return email.trim().toLowerCase().endsWith('@ejust.edu.eg') ? 'chef' : 'customer';
+}
+
+function createUser(email) {
+  const cleanEmail = email.trim().toLowerCase();
+  return {
+    email: cleanEmail,
+    name: cleanEmail.split('@')[0],
+    role: getRoleFromEmail(cleanEmail),
+  };
+}
+
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
-  const [token, setToken]     = useState(() => localStorage.getItem('kds_token'));
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('kds_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [token, setToken] = useState(() => localStorage.getItem('kds_token'));
+  const [loading] = useState(false);
 
-  // Restore session on mount
-  useEffect(() => {
-    if (token) {
-      getMe()
-        .then((res) => setUser(res.data))
-        .catch(() => {
-          localStorage.removeItem('kds_token');
-          setToken(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+  const authenticate = useCallback(async ({ email }) => {
+    const nextUser = createUser(email);
+    const nextToken = `demo-token-${Date.now()}`;
 
-  const login = useCallback(async (credentials) => {
-    const res = await apiLogin(credentials);
-    const { token: tok, user: u } = res.data;
-    localStorage.setItem('kds_token', tok);
-    setToken(tok);
-    setUser(u);
-    return u;
+    localStorage.setItem('kds_user', JSON.stringify(nextUser));
+    localStorage.setItem('kds_token', nextToken);
+    setUser(nextUser);
+    setToken(nextToken);
+
+    return nextUser;
   }, []);
 
-  const signup = useCallback(async (data) => {
-    const res = await apiSignup(data);
-    const { token: tok, user: u } = res.data;
-    localStorage.setItem('kds_token', tok);
-    setToken(tok);
-    setUser(u);
-    return u;
-  }, []);
+  const login = useCallback((credentials) => authenticate(credentials), [authenticate]);
+  const signup = useCallback((credentials) => authenticate(credentials), [authenticate]);
 
   const logout = useCallback(async () => {
-    try { await apiLogout(); } catch (_) {}
+    localStorage.removeItem('kds_user');
     localStorage.removeItem('kds_token');
     setToken(null);
     setUser(null);
@@ -59,4 +56,4 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
-}
+}
