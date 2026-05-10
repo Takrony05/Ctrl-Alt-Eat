@@ -31,8 +31,10 @@ export const getOrderById     = (id)         => api.get(`/orders/${id}/`);
 export const placeOrder       = (data)       => api.post('/orders/', data);
 export const updateOrderStatus = (id, data)  => api.patch(`/orders/${id}/`, data);
 
-// ── Dashboard ─────────────────────────────────────────────
-export const getDashboard = () => api.get('/dashboard/');
+// ── Dashboard / Kitchen ───────────────────────────────────
+export const getDashboard     = () => api.get('/dashboard/');
+// Semantic alias used by the chef feature
+export const getKitchenOrders = () => api.get('/dashboard/');
 
 // Compatibility alias for order_tracking-feat
 export const orderAPI = {
