@@ -97,7 +97,7 @@ function AppInner() {
             </ProtectedRoute>
           } />
           <Route path="/history" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['customer']}>
               <OrderHistory />
             </ProtectedRoute>
           } />

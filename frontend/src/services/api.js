@@ -16,6 +16,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle authentication errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // If unauthorized, clear the token so future requests (like public menu) work
+      localStorage.removeItem('kds_token');
+      // Optional: redirect to login if not already there
+      // window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ── Auth ──────────────────────────────────────────────────
 export const signup = (data) => api.post('/auth/signup/', data);
 export const login  = (data) => api.post('/auth/login/', data);

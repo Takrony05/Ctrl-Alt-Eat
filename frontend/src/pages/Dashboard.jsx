@@ -54,8 +54,8 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900">Kitchen Display</h1>
-          <p className="text-gray-500 mt-1">Orders shown oldest first (FIFO)</p>
+          <h1 className="text-3xl font-extrabold text-white">Live Kitchen Feed</h1>
+          <p className="text-white/50 mt-1">Orders shown in FIFO order</p>
         </div>
         <div className="flex items-center gap-4">
           {/* Stats chips */}
