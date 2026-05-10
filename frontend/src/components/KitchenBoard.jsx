@@ -28,11 +28,11 @@ function OrderCard({ order, onStatusChange }) {
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Order #{order.id}
           </p>
-          <h3 className="text-xl font-extrabold text-gray-900 mt-0.5">
+          <h3 className="text-xl font-extrabold text-white mt-0.5">
             Table {order.table_number}
           </h3>
           {order.created_by_name && (
-            <p className="text-xs text-gray-500 mt-0.5">by {order.created_by_name}</p>
+            <p className="text-xs text-white/60 mt-0.5">by {order.created_by_name}</p>
           )}
         </div>
 
@@ -62,7 +62,7 @@ function OrderCard({ order, onStatusChange }) {
             </span>
 
             <div className="flex-1">
-              <span className="font-bold text-gray-900">{item.menu_item_name}</span>
+              <span className="font-bold text-white">{item.menu_item_name}</span>
 
               {/* Add-ons — highlighted badges so chef can't miss them */}
               {item.selected_addons?.length > 0 && (
@@ -105,8 +105,8 @@ export default function KitchenBoard({ orders, onStatusChange }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="text-6xl mb-4">👨‍🍳</div>
-        <h3 className="text-xl font-bold text-gray-700 mb-2">No active orders right now.</h3>
-        <p className="text-gray-400">New orders will appear here automatically.</p>
+        <h3 className="text-xl font-bold text-white/70 mb-2">No active orders right now.</h3>
+        <p className="text-white/40">New orders will appear here automatically.</p>
       </div>
     );
   }
