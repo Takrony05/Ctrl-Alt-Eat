@@ -2,12 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useCart } from '../context/CartContext';
 import { getMenuItems } from '../services/api';
 
-const CATEGORIES = ['Main Meal', 'Dessert', 'Drink'];
+const CATEGORIES = ['Main Meal', 'Dessert', 'Drink', 'Side'];
 
 const CATEGORY_ICONS = {
   'Main Meal': '🍔',
   'Dessert':   '🍰',
   'Drink':     '🥤',
+  'Side':      '🍟',
 };
 
 function ItemCard({ item, onAdd }) {
