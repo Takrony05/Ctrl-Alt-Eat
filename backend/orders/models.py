@@ -61,7 +61,7 @@ class Order(models.Model):
         DELIVERED   = "delivered",   "Delivered"
         CANCELLED   = "cancelled",   "Cancelled"
 
-    table_number = models.PositiveIntegerField()
+    table_number = models.PositiveIntegerField(default=1)
     order_status = models.CharField(
         max_length=15,
         choices=Status.choices,
