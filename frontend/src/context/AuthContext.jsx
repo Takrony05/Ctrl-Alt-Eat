@@ -1,47 +1,9 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import * as api from '../services/api';
 
 const AuthContext = createContext(null);
-const ACCOUNTS_KEY = 'kds_accounts';
 const USER_KEY = 'kds_user';
 const TOKEN_KEY = 'kds_token';
-
-function getRoleFromEmail(email) {
-  return email.trim().toLowerCase().endsWith('@ejust.edu.eg') ? 'chef' : 'customer';
-}
-
-function normalizeEmail(email) {
-  return email.trim().toLowerCase();
-}
-
-function createUser(email) {
-  const cleanEmail = normalizeEmail(email);
-  return {
-    email: cleanEmail,
-    name: cleanEmail.split('@')[0],
-    role: getRoleFromEmail(cleanEmail),
-  };
-}
-
-function readAccounts() {
-  try {
-    return JSON.parse(localStorage.getItem(ACCOUNTS_KEY)) || {};
-  } catch (_) {
-    return {};
-  }
-}
-
-function saveSession(nextUser) {
-  const nextToken = `demo-token-${Date.now()}`;
-  localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-  localStorage.setItem(TOKEN_KEY, nextToken);
-  return nextToken;
-}
-
-function createAuthError(message, code) {
-  const error = new Error(message);
-  error.code = code;
-  return error;
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -53,61 +15,92 @@ export function AuthProvider({ children }) {
     }
   });
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Validate token on mount
+  useEffect(() => {
+    const validateToken = async () => {
+      const savedToken = localStorage.getItem(TOKEN_KEY);
+      if (!savedToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await api.getMe();
+        setUser(res.data);
+      } catch (err) {
+        console.error('Session validation failed', err);
+        localStorage.removeItem(USER_KEY);
+        localStorage.removeItem(TOKEN_KEY);
+        setUser(null);
+        setToken(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    validateToken();
+  }, []);
 
   const login = useCallback(async ({ email, password }) => {
-    const cleanEmail = normalizeEmail(email);
-    const accounts = readAccounts();
-    const account = accounts[cleanEmail];
+    try {
+      // We use email as the username for the backend
+      const res = await api.login({ username: email, password });
+      const { token: nextToken, user: nextUser } = res.data;
 
-    if (!account) {
-      throw createAuthError('Account not found. Please sign up first.', 'ACCOUNT_NOT_FOUND');
+      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      localStorage.setItem(TOKEN_KEY, nextToken);
+      
+      setUser(nextUser);
+      setToken(nextToken);
+
+      return nextUser;
+    } catch (err) {
+      const message = err.response?.data?.non_field_errors?.[0] || 
+                      err.response?.data?.detail || 
+                      'Invalid email or password.';
+      throw new Error(message);
     }
-
-    if (account.password !== password) {
-      throw createAuthError('Incorrect password. Please try again.', 'INVALID_PASSWORD');
-    }
-
-    const nextUser = createUser(cleanEmail);
-    const nextToken = saveSession(nextUser);
-    setUser(nextUser);
-    setToken(nextToken);
-
-    return nextUser;
   }, []);
 
   const signup = useCallback(async ({ email, password }) => {
-    const cleanEmail = normalizeEmail(email);
-    const accounts = readAccounts();
-
-    if (accounts[cleanEmail]) {
-      throw createAuthError('Account already exists. Please log in.', 'ACCOUNT_EXISTS');
-    }
-
-    const nextUser = createUser(cleanEmail);
-    const nextAccounts = {
-      ...accounts,
-      [cleanEmail]: {
-        email: cleanEmail,
+    try {
+      // Use email as username for simplicity
+      const res = await api.signup({ 
+        username: email, 
+        email, 
         password,
-        role: nextUser.role,
-        createdAt: new Date().toISOString(),
-      },
-    };
+        name: email.split('@')[0]
+      });
+      const { token: nextToken, user: nextUser } = res.data;
 
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(nextAccounts));
-    const nextToken = saveSession(nextUser);
-    setUser(nextUser);
-    setToken(nextToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+      localStorage.setItem(TOKEN_KEY, nextToken);
 
-    return nextUser;
+      setUser(nextUser);
+      setToken(nextToken);
+
+      return nextUser;
+    } catch (err) {
+      const message = err.response?.data?.email?.[0] || 
+                      err.response?.data?.username?.[0] || 
+                      'Could not create account. Please try again.';
+      throw new Error(message);
+    }
   }, []);
 
   const logout = useCallback(async () => {
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-    setUser(null);
+    try {
+      await api.logout();
+    } catch (err) {
+      console.error('Logout API call failed', err);
+    } finally {
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+      setUser(null);
+    }
   }, []);
 
   return (

@@ -16,6 +16,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Handle authentication errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // If unauthorized, clear the token so future requests (like public menu) work
+      localStorage.removeItem('kds_token');
+      // Optional: redirect to login if not already there
+      // window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 // ── Auth ──────────────────────────────────────────────────
 export const signup = (data) => api.post('/auth/signup/', data);
 export const login  = (data) => api.post('/auth/login/', data);
@@ -31,8 +45,10 @@ export const getOrderById     = (id)         => api.get(`/orders/${id}/`);
 export const placeOrder       = (data)       => api.post('/orders/', data);
 export const updateOrderStatus = (id, data)  => api.patch(`/orders/${id}/`, data);
 
-// ── Dashboard ─────────────────────────────────────────────
-export const getDashboard = () => api.get('/dashboard/');
+// ── Dashboard / Kitchen ───────────────────────────────────
+export const getDashboard     = () => api.get('/dashboard/');
+// Semantic alias used by the chef feature
+export const getKitchenOrders = () => api.get('/dashboard/');
 
 // Compatibility alias for order_tracking-feat
 export const orderAPI = {

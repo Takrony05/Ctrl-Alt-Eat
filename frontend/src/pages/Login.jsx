@@ -32,7 +32,7 @@ export default function Login() {
   }, [toast]);
 
   if (!loading && user) {
-    return <Navigate to={user.role === 'chef' ? '/chef' : '/menu'} replace />;
+    return <Navigate to={user.role === 'chef' ? '/kitchen-dashboard' : '/menu'} replace />;
   }
 
   const handleChange = (event) => {
