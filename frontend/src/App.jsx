@@ -33,7 +33,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (!user) return <Navigate to="/login" replace />;
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Wrong role — redirect to their home
-    return <Navigate to={user.role === 'chef' ? '/chef' : '/menu'} replace />;
+    return <Navigate to={user.role === 'chef' ? '/kitchen-dashboard' : '/menu'} replace />;
   }
   return children;
 }
@@ -97,22 +97,24 @@ function AppInner() {
             </ProtectedRoute>
           } />
           <Route path="/history" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['customer']}>
               <OrderHistory />
             </ProtectedRoute>
           } />
 
           {/* Chef routes */}
-          <Route path="/chef" element={
+          <Route path="/kitchen-dashboard" element={
             <ProtectedRoute allowedRoles={['chef']}>
               <Dashboard />
             </ProtectedRoute>
           } />
+          {/* Legacy alias — redirects to the canonical chef route */}
+          <Route path="/chef" element={<Navigate to="/kitchen-dashboard" replace />} />
 
           {/* Redirects */}
           <Route path="/" element={
             user
-              ? <Navigate to={user.role === 'chef' ? '/chef' : '/menu'} replace />
+              ? <Navigate to={user.role === 'chef' ? '/kitchen-dashboard' : '/menu'} replace />
               : <Navigate to="/login" replace />
           } />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -45,10 +45,18 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.all().prefetch_related(
+        qs = Order.objects.prefetch_related(
             'items__menu_item',
             'items__selected_addons',
         ).select_related('created_by')
+
+        user = self.request.user
+        # Staff, superusers, and chefs see all orders (needed for KDS / Dashboard)
+        if user.is_staff or user.is_superuser or getattr(user, 'role', None) == 'chef':
+            return qs.all()
+
+        # Regular customers only see their own orders
+        return qs.filter(created_by=user)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -70,13 +78,13 @@ class OrderViewSet(viewsets.ModelViewSet):
         return Response(detail_serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
-        """PATCH /api/orders/{id}/ — Chef marks order as ready."""
+        """PATCH /api/orders/{id}/ — Chef updates order status."""
         order = self.get_object()
         serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        order = serializer.save()  # re-assign to get fresh instance
 
-        # If order is now 'ready', broadcast WebSocket event
+        # Broadcast WebSocket event when order becomes ready
         if order.order_status == Order.Status.READY:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
