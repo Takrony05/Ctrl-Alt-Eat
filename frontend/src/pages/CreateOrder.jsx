@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { getMenuItems } from '../services/api';
 import { MainMealIcon, DessertIcon, DrinkIcon, SideIcon, PlateIcon } from '../components/Icons';
@@ -14,7 +13,6 @@ const CATEGORY_ICONS = {
 };
 
 function ItemCard({ item, onAdd }) {
-  const { t } = useTranslation();
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [added, setAdded] = useState(false);
 
@@ -50,7 +48,7 @@ function ItemCard({ item, onAdd }) {
 
       {item.available_addons?.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--cream-subtle)' }}>{t('addons')}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--cream-subtle)' }}>Add-ons</p>
           <div className="flex flex-wrap gap-1.5">
             {item.available_addons.map((addon) => {
               const active = !!selectedAddons.find((a) => a.id === addon.id);
@@ -71,7 +69,7 @@ function ItemCard({ item, onAdd }) {
       <div className="flex items-center justify-between mt-auto pt-3" style={{ borderTop: '1px solid var(--border)' }}>
         <span className="text-xl font-extrabold" style={{ color: 'var(--orange)' }}>${totalPrice}</span>
         <button onClick={handleAdd} className={`add-btn ${added ? 'add-btn-success' : ''}`}>
-          {added ? '✓' : `+ ${t('add_to_cart')}`}
+          {added ? '✓' : `+ Add to Cart`}
         </button>
       </div>
     </div>
@@ -79,7 +77,6 @@ function ItemCard({ item, onAdd }) {
 }
 
 export default function CreateOrder() {
-  const { t } = useTranslation();
   const { addToCart } = useCart();
   const [activeTab, setActiveTab] = useState('Main Meal');
   const [menuData, setMenuData]   = useState({});
@@ -98,7 +95,7 @@ export default function CreateOrder() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-4xl font-black tracking-tight" style={{ color: 'var(--cream)' }}>{t('menu_title')}</h1>
+        <h1 className="text-4xl font-black tracking-tight" style={{ color: 'var(--cream)' }}>Our Menu</h1>
         <p className="mt-2 font-medium" style={{ color: 'var(--cream-muted)' }}>Fresh flavors delivered to your table.</p>
       </div>
 
@@ -108,7 +105,7 @@ export default function CreateOrder() {
           <button key={cat} onClick={() => setActiveTab(cat)}
             className={`tab-btn ${activeTab === cat ? 'tab-btn-active' : ''}`}>
             <span className="text-base">{CATEGORY_ICONS[cat]}</span>
-            {t(cat.toLowerCase().replace(' ', '_')) || cat}
+            {cat}
           </button>
         ))}
       </div>

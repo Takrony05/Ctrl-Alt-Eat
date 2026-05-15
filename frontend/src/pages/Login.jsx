@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { EyeIcon, EyeOffIcon, ChefHatIcon, StarIcon } from '../components/Icons';
 
@@ -9,7 +8,6 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function Login() {
   const { login, signup, user, loading } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
 
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ email: '', password: '' });
@@ -78,8 +76,8 @@ export default function Login() {
   };
 
   const modeCopy = mode === 'login'
-    ? { title: t('login_title'), button: t('login_button'), switchText: t('no_account_text'), switchAction: t('create_account') }
-    : { title: t('create_account'), button: t('create_account'), switchText: t('signup_text'), switchAction: t('login_button') };
+    ? { title: 'Login to', button: 'Login', switchText: 'Don\'t have an account?', switchAction: 'Create Account' }
+    : { title: 'Create Account', button: 'Create Account', switchText: 'Already have an account?', switchAction: 'Login' };
 
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-10" style={{ background: 'var(--bg-primary)' }}>
@@ -102,7 +100,7 @@ export default function Login() {
         <section className="hidden animate-fade-in-up lg:flex flex-col items-center text-center">
           <img src="/logo.png" alt="Ctrl+Alt+Eat" className="w-72 mb-8 animate-float" style={{ filter: 'drop-shadow(0 8px 30px rgba(var(--orange-rgb),0.25))' }} />
           <h1 className="text-4xl font-black leading-tight tracking-tight" style={{ color: 'var(--cream)' }}>
-            {t('login_title')} <span className="gradient-text">Ctrl+Alt+Eat</span>
+            Login to <span className="gradient-text">Ctrl+Alt+Eat</span>
           </h1>
           <p className="mt-4 max-w-md text-base leading-7" style={{ color: 'var(--cream-muted)' }}>
             Your favorite campus kitchen, just a click away. Fresh meals, sweet treats, and refreshing drinks — all made to order.
@@ -147,7 +145,7 @@ export default function Login() {
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-semibold" style={{ color: 'var(--cream-muted)' }} htmlFor="email">{t('email_placeholder')}</label>
+              <label className="mb-2 block text-sm font-semibold" style={{ color: 'var(--cream-muted)' }} htmlFor="email">Email Address</label>
               <input id="email" name="email" type="email" value={form.email} onChange={handleChange}
                 className="input-field w-full rounded-2xl" placeholder="you@example.com" />
               {form.email && !emailIsValid && (
@@ -156,7 +154,7 @@ export default function Login() {
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-semibold" style={{ color: 'var(--cream-muted)' }} htmlFor="password">{t('password_placeholder')}</label>
+              <label className="mb-2 block text-sm font-semibold" style={{ color: 'var(--cream-muted)' }} htmlFor="password">Password</label>
               <div className="relative">
                 <input id="password" name="password" type={showPassword ? 'text' : 'password'} value={form.password} onChange={handleChange}
                   className="input-field w-full rounded-2xl pr-20" placeholder="At least 6 characters" />
