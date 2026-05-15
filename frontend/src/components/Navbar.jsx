@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { CartIcon, MenuIcon, CloseIcon, LogoutIcon, ChefHatIcon, HistoryIcon } from './Icons';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -18,26 +19,26 @@ export default function Navbar() {
     navigate('/login', { replace: true });
   };
 
-  const navLink = (to, label) => {
+  const navLink = (to, label, icon) => {
     const active = location.pathname === to;
     return (
       <Link
         to={to}
-        className={`nav-link ${active ? 'nav-link-active' : ''}`}
+        className={`nav-link flex items-center gap-2 ${active ? 'nav-link-active' : ''}`}
         onClick={() => setMenuOpen(false)}
       >
+        {icon && <span style={{ fontSize: '1.1em' }}>{icon}</span>}
         {label}
       </Link>
     );
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <header className="sticky top-0 z-40 border-b" style={{ background: 'rgba(14,12,8,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link to={isChef ? '/chef' : isCustomer ? '/menu' : '/'} className="flex items-center gap-2 flex-shrink-0">
-          <span className="text-2xl">🍽️</span>
-          <span className="font-extrabold text-gray-900 text-lg tracking-tight">Ctrl-Alt-Eat</span>
+        <Link to={isChef ? '/kitchen-dashboard' : isCustomer ? '/menu' : '/'} className="flex items-center gap-3 flex-shrink-0 group">
+          <img src="/logo.png" alt="Ctrl+Alt+Eat" className="h-9 w-auto transition-transform duration-300 group-hover:scale-105" />
         </Link>
 
         {/* Desktop Nav */}
@@ -45,24 +46,25 @@ export default function Navbar() {
           {isCustomer && (
             <>
               {navLink('/menu', 'Menu')}
-              {navLink('/history', 'Order History')}
+              {navLink('/history', 'Orders', <HistoryIcon />)}
             </>
           )}
-          {isChef && navLink('/chef', 'Kitchen Dashboard')}
+          {isChef && navLink('/kitchen-dashboard', 'Kitchen', <ChefHatIcon />)}
         </nav>
 
         {/* Right side */}
         <div className="flex items-center gap-3">
-          {/* Cart icon — customers only */}
+          {/* Cart icon */}
           {isCustomer && (
             <Link
               to="/cart"
-              className="relative flex items-center justify-center w-10 h-10 rounded-full bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+              className="relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200"
+              style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}
               aria-label="Open cart"
             >
-              <span className="text-xl">🛒</span>
+              <CartIcon className="" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
+                <span className="absolute -top-1 -right-1 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg" style={{ background: 'var(--orange)' }}>
                   {totalItems > 9 ? '9+' : totalItems}
                 </span>
               )}
@@ -71,14 +73,14 @@ export default function Navbar() {
 
           {/* User pill */}
           {user && (
-            <div className="hidden md:flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1.5">
-              <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                {(user.name || user.username).charAt(0).toUpperCase()}
+            <div className="hidden md:flex items-center gap-2 rounded-full px-3 py-1.5" style={{ background: 'rgba(250,243,232,0.06)', border: '1px solid var(--border)' }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: 'var(--orange)' }}>
+                {(user.name || user.username || 'U').charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm font-semibold text-gray-700 max-w-[8rem] truncate">
+              <span className="text-sm font-semibold max-w-[8rem] truncate" style={{ color: 'var(--cream)' }}>
                 {user.name || user.username}
               </span>
-              <span className="text-xs text-gray-400 capitalize">{user.role}</span>
+              <span className="text-xs capitalize" style={{ color: 'var(--cream-muted)' }}>{user.role}</span>
             </div>
           )}
 
@@ -86,40 +88,45 @@ export default function Navbar() {
           {user && (
             <button
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors px-3 py-1.5 rounded-full hover:bg-red-50"
+              className="hidden md:flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 px-3 py-1.5 rounded-full"
+              style={{ color: 'var(--cream-muted)' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--cream-muted)'; e.currentTarget.style.background = 'transparent'; }}
             >
-              <span>↩</span> Logout
+              <LogoutIcon /> Logout
             </button>
           )}
 
           {/* Mobile hamburger */}
           <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+            onClick={() => setMenuOpen(v => !v)}
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-full transition"
+            style={{ color: 'var(--cream)' }}
             aria-label="Toggle menu"
           >
-            <span className="text-xl">{menuOpen ? '✕' : '☰'}</span>
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-1">
+        <div className="md:hidden px-4 py-3 flex flex-col gap-1 animate-slide-down" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
           {isCustomer && (
             <>
-              {navLink('/menu', '🍔 Menu')}
-              {navLink('/cart', `🛒 Cart${totalItems > 0 ? ` (${totalItems})` : ''}`)}
-              {navLink('/history', '📋 Order History')}
+              {navLink('/menu', 'Menu')}
+              {navLink('/cart', `Cart${totalItems > 0 ? ` (${totalItems})` : ''}`, <CartIcon />)}
+              {navLink('/history', 'Order History', <HistoryIcon />)}
             </>
           )}
-          {isChef && navLink('/chef', '👨‍🍳 Kitchen Dashboard')}
+          {isChef && navLink('/kitchen-dashboard', 'Kitchen Dashboard', <ChefHatIcon />)}
           {user && (
             <button
               onClick={handleLogout}
-              className="text-left text-sm font-semibold text-red-500 px-3 py-2 rounded-xl hover:bg-red-50 transition mt-1"
+              className="text-left text-sm font-semibold px-3 py-2 rounded-xl transition mt-1 flex items-center gap-2"
+              style={{ color: 'var(--danger)' }}
             >
-              ↩ Logout
+              <LogoutIcon /> Logout
             </button>
           )}
         </div>
