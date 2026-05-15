@@ -7,7 +7,7 @@ import { RocketIcon } from '../components/Icons';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, grandTotal, clearCart } = useCart();
+  const { cartItems, grandTotal } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [payMethod, setPayMethod] = useState('card');

@@ -40,7 +40,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
         {/* Logo */}
         <Link to={isChef ? '/kitchen-dashboard' : isCustomer ? '/menu' : '/'} className="flex items-center gap-3 flex-shrink-0 group">
-          <img src="/logo.png" alt="Ctrl+Alt+Eat" className="h-9 w-auto transition-transform duration-300 group-hover:scale-105" />
+          <img src="/logo.png" alt="Ctrl+Alt+Eat" className="h-12 w-auto transition-transform duration-300 group-hover:scale-105" />
         </Link>
 
         {/* Desktop Nav */}

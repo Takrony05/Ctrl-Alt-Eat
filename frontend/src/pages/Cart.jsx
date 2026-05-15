@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import { placeOrder } from '../services/api';
 import PaymentOptions from '../components/PaymentOptions';
 import { CartIcon, ArrowLeftIcon, PlusIcon, MinusIcon, TrashIcon } from '../components/Icons';
 
 export default function Cart() {
   const { cartItems, removeFromCart, decrementItem, addToCart, clearCart, grandTotal, totalItems } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [tableNumber, setTableNumber] = useState(1);
