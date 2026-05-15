@@ -33,3 +33,42 @@ class TestModels:
         order = Order.objects.create(table_number=5)
         order_item = OrderItem.objects.create(order=order, menu_item=item, quantity=2)
         assert str(order_item) == f"2x Burger (Order #{order.id})"
+
+    def test_negative_price_addon_fails_validation(self):
+        from django.core.exceptions import ValidationError
+        addon = AddOn(name="Test Addon", price=-5.00)
+        with pytest.raises(ValidationError):
+            addon.full_clean()
+
+    def test_negative_price_menu_item_fails_validation(self):
+        from django.core.exceptions import ValidationError
+        item = MenuItem(name="Burger", category="Main Meal", price=-10.00)
+        with pytest.raises(ValidationError):
+            item.full_clean()
+
+    def test_order_table_number_boundaries(self):
+        from django.core.exceptions import ValidationError
+        # Below boundary
+        order_low = Order(table_number=0)
+        with pytest.raises(ValidationError):
+            order_low.full_clean()
+        
+        # Above boundary
+        order_high = Order(table_number=101)
+        with pytest.raises(ValidationError):
+            order_high.full_clean()
+
+    def test_order_item_quantity_boundaries(self):
+        from django.core.exceptions import ValidationError
+        item = MenuItem.objects.create(name="Burger", category="Main Meal", price=10.00)
+        order = Order.objects.create(table_number=5)
+        
+        # Below boundary
+        order_item_low = OrderItem(order=order, menu_item=item, quantity=0)
+        with pytest.raises(ValidationError):
+            order_item_low.full_clean()
+        
+        # Above boundary
+        order_item_high = OrderItem(order=order, menu_item=item, quantity=51)
+        with pytest.raises(ValidationError):
+            order_item_high.full_clean()

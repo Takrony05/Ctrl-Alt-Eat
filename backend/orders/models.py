@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 
@@ -30,7 +31,12 @@ class User(AbstractUser):
 # ------------------------------------------------------------
 class AddOn(models.Model):
     name  = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
+    price = models.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        default=0.00,
+        validators=[MinValueValidator(0.00)]
+    )
 
     def __str__(self):
         return f"{self.name} (+${self.price:.2f})"
@@ -43,7 +49,11 @@ class MenuItem(models.Model):
     name             = models.CharField(max_length=255)
     description      = models.TextField(blank=True, default="")
     category         = models.CharField(max_length=100) # e.g. "Main Meal", "Dessert", "Drink"
-    price            = models.DecimalField(max_digits=8, decimal_places=2)
+    price            = models.DecimalField(
+        max_digits=8, 
+        decimal_places=2,
+        validators=[MinValueValidator(0.00)]
+    )
     available_addons = models.ManyToManyField(AddOn, blank=True, related_name="menu_items")
     created_at       = models.DateTimeField(auto_now_add=True)
 
@@ -61,7 +71,10 @@ class Order(models.Model):
         DELIVERED   = "delivered",   "Delivered"
         CANCELLED   = "cancelled",   "Cancelled"
 
-    table_number = models.PositiveIntegerField(default=1)
+    table_number = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(100)]
+    )
     order_status = models.CharField(
         max_length=15,
         choices=Status.choices,
@@ -102,7 +115,10 @@ class OrderItem(models.Model):
         on_delete=models.PROTECT,
         related_name="order_items",
     )
-    quantity         = models.PositiveIntegerField(default=1)
+    quantity         = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(50)]
+    )
     selected_addons  = models.ManyToManyField(AddOn, blank=True, related_name="order_items")
     notes            = models.TextField(blank=True, default="")
     created_at       = models.DateTimeField(auto_now_add=True)
