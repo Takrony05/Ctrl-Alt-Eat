@@ -33,7 +33,7 @@ class AddOn(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f"{self.name} (+${self.price})"
+        return f"{self.name} (+${self.price:.2f})"
 
 
 # ------------------------------------------------------------
@@ -48,7 +48,7 @@ class MenuItem(models.Model):
     created_at       = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.name} — {self.category} (${self.price})"
+        return f"{self.name} — {self.category} (${self.price:.2f})"
 
 
 # ------------------------------------------------------------
