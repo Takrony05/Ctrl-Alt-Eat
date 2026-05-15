@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { CartIcon, MenuIcon, CloseIcon, LogoutIcon, ChefHatIcon, HistoryIcon } from './Icons';
 
 export default function Navbar() {
@@ -10,6 +12,13 @@ export default function Navbar() {
   const navigate         = useNavigate();
   const location         = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
+  const { t, i18n } = useTranslation();
+
+  const handleLangToggle = () => {
+    const newLang = i18n.language === 'en' ? 'ar' : 'en';
+    i18n.changeLanguage(newLang);
+  };
 
   const isCustomer = user?.role === 'customer';
   const isChef     = user?.role === 'chef';
@@ -45,15 +54,22 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-1">
           {isCustomer && (
             <>
-              {navLink('/menu', 'Menu')}
-              {navLink('/history', 'Orders', <HistoryIcon />)}
+              {navLink('/menu', t('menu_title'))}
+              {navLink('/history', t('order_history'), <HistoryIcon />)}
             </>
           )}
-          {isChef && navLink('/kitchen-dashboard', 'Kitchen', <ChefHatIcon />)}
+          {isChef && navLink('/kitchen-dashboard', t('dashboard_title'), <ChefHatIcon />)}
         </nav>
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Toggles */}
+          <button onClick={toggleTheme} className="flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200" style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}>
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button onClick={handleLangToggle} className="text-sm font-bold flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200" style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}>
+            {i18n.language === 'en' ? 'ع' : 'En'}
+          </button>
           {/* Cart icon */}
           {isCustomer && (
             <Link
@@ -93,7 +109,7 @@ export default function Navbar() {
               onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
               onMouseLeave={e => { e.currentTarget.style.color = 'var(--cream-muted)'; e.currentTarget.style.background = 'transparent'; }}
             >
-              <LogoutIcon /> Logout
+              <LogoutIcon /> {t('logout')}
             </button>
           )}
 
@@ -114,19 +130,19 @@ export default function Navbar() {
         <div className="md:hidden px-4 py-3 flex flex-col gap-1 animate-slide-down" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
           {isCustomer && (
             <>
-              {navLink('/menu', 'Menu')}
-              {navLink('/cart', `Cart${totalItems > 0 ? ` (${totalItems})` : ''}`, <CartIcon />)}
-              {navLink('/history', 'Order History', <HistoryIcon />)}
+              {navLink('/menu', t('menu_title'))}
+              {navLink('/cart', `${t('cart_title')}${totalItems > 0 ? ` (${totalItems})` : ''}`, <CartIcon />)}
+              {navLink('/history', t('order_history'), <HistoryIcon />)}
             </>
           )}
-          {isChef && navLink('/kitchen-dashboard', 'Kitchen Dashboard', <ChefHatIcon />)}
+          {isChef && navLink('/kitchen-dashboard', t('dashboard_title'), <ChefHatIcon />)}
           {user && (
             <button
               onClick={handleLogout}
               className="text-left text-sm font-semibold px-3 py-2 rounded-xl transition mt-1 flex items-center gap-2"
               style={{ color: 'var(--danger)' }}
             >
-              <LogoutIcon /> Logout
+              <LogoutIcon /> {t('logout')}
             </button>
           )}
         </div>

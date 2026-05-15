@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { placeOrder } from '../services/api';
+import { useTranslation } from 'react-i18next';
 import PaymentOptions from '../components/PaymentOptions';
 import { CartIcon, ArrowLeftIcon, PlusIcon, MinusIcon, TrashIcon } from '../components/Icons';
 
 export default function Cart() {
+  const { t } = useTranslation();
   const { cartItems, removeFromCart, decrementItem, addToCart, clearCart, grandTotal, totalItems } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -44,12 +46,12 @@ export default function Cart() {
   if (cartItems.length === 0) {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-4xl" style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}>
+        <div className="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center text-4xl" style={{ background: 'rgba(var(--orange-rgb),0.1)', color: 'var(--orange)' }}>
           <CartIcon />
         </div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--cream)' }}>Your cart is empty</h2>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--cream)' }}>{t('empty_cart')}</h2>
         <p className="mb-6" style={{ color: 'var(--cream-muted)' }}>Add some items from the menu to get started.</p>
-        <button onClick={() => navigate('/menu')} className="btn-primary">Browse Menu</button>
+        <button onClick={() => navigate('/menu')} className="btn-primary">{t('menu_title')}</button>
       </div>
     );
   }
@@ -57,9 +59,9 @@ export default function Cart() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-extrabold" style={{ color: 'var(--cream)' }}>Your Cart</h1>
+        <h1 className="text-3xl font-extrabold" style={{ color: 'var(--cream)' }}>{t('cart_title')}</h1>
         <button onClick={() => navigate('/menu')} className="text-sm font-medium flex items-center gap-1 transition hover:gap-2" style={{ color: 'var(--orange)' }}>
-          <ArrowLeftIcon /> Back to Menu
+          <ArrowLeftIcon /> {t('go_back')}
         </button>
       </div>
 
@@ -89,13 +91,13 @@ export default function Cart() {
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button onClick={() => decrementItem(idx)}
                   className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm transition"
-                  style={{ background: 'rgba(250,243,232,0.06)', color: 'var(--cream-muted)' }}>
+                  style={{ background: 'rgba(var(--glass-color),0.06)', color: 'var(--cream-muted)' }}>
                   <MinusIcon />
                 </button>
                 <span className="w-5 text-center font-semibold" style={{ color: 'var(--cream)' }}>{c.quantity}</span>
                 <button onClick={() => addToCart(c.menuItem, c.selectedAddons, c.notes)}
                   className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm transition"
-                  style={{ background: 'rgba(232,146,60,0.12)', color: 'var(--orange)' }}>
+                  style={{ background: 'rgba(var(--orange-rgb),0.12)', color: 'var(--orange)' }}>
                   <PlusIcon />
                 </button>
                 <button onClick={() => removeFromCart(idx)}
@@ -135,8 +137,8 @@ export default function Cart() {
 
       <button onClick={handlePlaceOrder} disabled={submitting} className="w-full btn-primary text-lg py-4">
         {submitting
-          ? <span className="flex items-center justify-center gap-2"><span className="spinner" /> Placing Order...</span>
-          : `Place Order — $${grandTotal.toFixed(2)}`
+          ? <span className="flex items-center justify-center gap-2"><span className="spinner" /> {t('preparing_order')}</span>
+          : `${t('place_order')} — $${grandTotal.toFixed(2)}`
         }
       </button>
     </div>

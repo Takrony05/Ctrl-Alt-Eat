@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -42,6 +43,12 @@ function ProtectedRoute({ children, allowedRoles }) {
 function AppInner() {
   const { user } = useAuth();
   const [toasts, setToasts] = useState([]);
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
 
   const handleOrderReady = useCallback((event) => {
     // Only show toast if this customer placed the order
@@ -51,10 +58,10 @@ function AppInner() {
       const id = Date.now();
       setToasts((prev) => [
         ...prev,
-        { id, message: event.message || 'Your order is ready to be picked up!' },
+        { id, message: event.message || t('order_ready') },
       ]);
     }
-  }, [user]);
+  }, [user, t]);
 
   useOrderSocket(handleOrderReady);
 
