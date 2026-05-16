@@ -87,6 +87,8 @@ class MenuItemSerializer(serializers.ModelSerializer):
 # ------------------------------------------------------------
 class OrderItemCreateSerializer(serializers.ModelSerializer):
     """Used when a customer submits a cart."""
+    notes = serializers.CharField(max_length=500, required=False, allow_blank=True)
+
     class Meta:
         model = OrderItem
         fields = ['menu_item', 'quantity', 'selected_addons', 'notes']
