@@ -100,7 +100,7 @@ export default function CreateOrder() {
       </div>
 
       {/* Category Tabs */}
-      <div className="flex gap-2 mb-8 p-1.5 rounded-[20px] w-fit backdrop-blur-md" style={{ background: 'rgba(var(--glass-color),0.04)', border: '1px solid var(--border)' }}>
+      <div className="flex flex-wrap gap-2 mb-8 p-1.5 rounded-[20px] w-full sm:w-fit justify-center sm:justify-start backdrop-blur-md" style={{ background: 'rgba(var(--glass-color),0.04)', border: '1px solid var(--border)' }}>
         {CATEGORIES.map((cat) => (
           <button key={cat} onClick={() => setActiveTab(cat)}
             className={`tab-btn ${activeTab === cat ? 'tab-btn-active' : ''}`}>
