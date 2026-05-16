@@ -1,0 +1,50 @@
+name: KDS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, chef-feat2 ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install Dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install dj-database-url whitenoise coverage
+      - name: Run Backend Tests with Coverage
+        run: |
+          cd backend
+          coverage run manage.py test orders.tests
+          coverage report -m
+          coverage xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage.xml
+
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          npm install
+          npx playwright install --with-deps
+      - name: Run E2E Tests
+        run: |
+          cd frontend
+          npx playwright test
