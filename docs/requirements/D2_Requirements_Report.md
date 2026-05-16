@@ -59,9 +59,11 @@ Offstage actors care about the outcome but are not directly part of the main run
 
 ---
 
-## 3. Functional Requirements
+## 3. Requirements
 
 The following requirements are extracted only from the implemented project. They avoid features that are not present in the code.
+
+### 3.1 Functional Requirements
 
 | ID | Requirement | Priority | Related Actor(s) | Implementation Evidence |
 |---|---|---:|---|---|
@@ -76,34 +78,53 @@ The following requirements are extracted only from the implemented project. They
 | FR-09 | Chefs shall see active kitchen orders in FIFO order. | High | Chef | `DashboardViewSet.get_queryset`, `Dashboard.jsx`, `KitchenBoard.jsx` |
 | FR-10 | Chefs shall update order status from `in_progress` to `ready`, then from `ready` to `delivered`. | High | Chef, Customer | `OrderViewSet.partial_update`, `StatusButtons.jsx`, integration tests |
 | FR-11 | Customers shall receive a ready-order notification for their own order. | Medium | Customer, WebSocket Channel | `OrderConsumer`, `useOrderSocket`, `App.jsx` customer-id filtering, `Toast.jsx` |
-| FR-12 | The system shall validate key order boundaries: table number 1-100, item quantity 1-50, non-negative prices, and note length. | High | Customer, Chef, Database | Django validators in `models.py`, serializer validation tests |
-| FR-13 | The UI shall handle empty cart, empty menu category, and empty kitchen queue states. | Medium | Customer, Chef | `Cart.jsx`, `CreateOrder.jsx`, `KitchenBoard.jsx` |
-| FR-14 | The system shall support logout and token/session cleanup on the frontend. | Medium | Customer, Chef | `LogoutView`, `AuthContext.logout`, `Navbar.jsx` |
-| FR-15 | The checkout UI shall allow selecting a demo payment method before placing an order, without processing real payment. | Low | Customer, Cashier | `PaymentOptions.jsx`, `Cart.jsx`, `CheckoutPage.jsx` |
+| FR-12 | The system shall support logout and token/session cleanup on the frontend. | Medium | Customer, Chef | `LogoutView`, `AuthContext.logout`, `Navbar.jsx` |
+| FR-13 | The checkout UI shall allow selecting a demo payment method before placing an order, without processing real payment. | Low | Customer, Cashier | `PaymentOptions.jsx`, `Cart.jsx`, `CheckoutPage.jsx` |
+
+### 3.2 Non-Functional Requirements
+
+These requirements describe quality constraints and operating conditions that the implementation already addresses to some level.
+
+| ID | Non-Functional Requirement | Quality Attribute | Priority | Implementation Evidence |
+|---|---|---|---:|---|
+| NFR-01 | The system shall enforce role-based access control so customers cannot access kitchen-only operations. | Security | High | `ProtectedRoute` in `App.jsx`, `OrderViewSet.get_queryset`, dashboard/status permission checks |
+| NFR-02 | The system shall protect data integrity by rejecting invalid table numbers, invalid quantities, negative prices, and overly long notes. | Data Integrity | High | Django validators in `models.py`, serializer validation tests |
+| NFR-03 | The customer notification flow shall recover from temporary WebSocket disconnection where possible. | Reliability | Medium | `useOrderSocket` reconnect logic, `OrderStatusPoller` fallback polling |
+| NFR-04 | The interface shall provide clear feedback for empty cart, empty menu category, empty kitchen queue, loading, and failed request states. | Usability | Medium | `Cart.jsx`, `CreateOrder.jsx`, `Dashboard.jsx`, `KitchenBoard.jsx` |
+| NFR-05 | The kitchen dashboard shall keep active orders understandable during busy periods by preserving FIFO ordering and showing simple workload indicators. | Operational Performance | Medium | `DashboardViewSet.get_queryset`, `Dashboard.jsx` active counts, `KitchenBoard.jsx` wait-time display |
 
 ---
 
 ## 4. Traceability Heatmap / Matrix
 
-Legend: `H = strong direct evidence`, `M = partial evidence`, `L = weak/supporting evidence`, `- = not applicable`.
+Legend: `GREEN / H = strong direct evidence`, `YELLOW / M = partial evidence`, `RED / L = weak/supporting evidence`, `- = not applicable`.
+
+| Heat Level | Meaning | Interpretation |
+|---|---|---|
+| GREEN / H | Strong coverage | Requirement is directly supported by UI, backend/data evidence, and tests or strong implementation proof. |
+| YELLOW / M | Medium coverage | Requirement is implemented, but evidence is partial or would benefit from more tests. |
+| RED / L | Weak coverage | Requirement has limited evidence, usually because it is UI-only or outside the core backend flow. |
 
 | Req ID | Feature / Behavior | UI Screen or Component | API / Backend | Database Entities | Tests / Evidence | Coverage |
 |---|---|---|---|---|---|---|
-| FR-01 | Signup/login | `Login.jsx` | `/api/auth/signup/`, `/api/auth/login/` | `User`, `Token` | `test_signup_api`, `test_login_api`, `Auth.test.jsx` | H |
-| FR-02 | Role detection | `Login.jsx` role preview | `SignupSerializer.create` | `User.role` | `test_signup_serializer_customer`, `test_signup_serializer_chef`, `Auth.test.jsx` | H |
-| FR-03 | Role routing | `App.jsx`, `Navbar.jsx` | Authenticated API calls | `User.role` | Frontend context tests indirectly | M |
-| FR-04 | Menu browsing | `CreateOrder.jsx` | `GET /api/menu-items/` | `MenuItem`, `AddOn` | `test_menu_items_api` | H |
-| FR-05 | Cart management | `CreateOrder.jsx`, `Cart.jsx` | - | Browser state only | `Cart.test.jsx` | H |
-| FR-06 | Order submission | `Cart.jsx`, `CheckoutPage.jsx` | `POST /api/orders/` | `Order`, `OrderItem` | `test_create_order_authenticated`, serializer tests | H |
-| FR-07 | Order persistence | Kitchen/order screens | `OrderSerializer` | `Order`, `OrderItem`, `MenuItem`, `AddOn`, `User` | `test_order_model`, `test_order_item_model` | H |
-| FR-08 | Customer order isolation | `OrderHistory.jsx` | `OrderViewSet.get_queryset` | `Order.created_by` | `test_customer_cannot_see_others_orders` | H |
-| FR-09 | FIFO kitchen dashboard | `Dashboard.jsx`, `KitchenBoard.jsx` | `GET /api/dashboard/` | `Order.created_at`, `Order.order_status` | Integration tests support endpoint access | M |
-| FR-10 | Status workflow | `StatusButtons.jsx` | `PATCH /api/orders/{id}/` | `Order.order_status` | `test_chef_can_update_status`, access-control tests | H |
-| FR-11 | Ready notification | `Toast.jsx`, `ReadyNotification.jsx` | `ws/orders/`, group broadcast | `Order.created_by_id` in event | `test_order_ready_broadcast` | M |
-| FR-12 | Boundary validation | Forms and API errors | Serializers/models | `Order`, `OrderItem`, `MenuItem`, `AddOn` | Model and serializer boundary tests | H |
-| FR-13 | Empty states | `Cart.jsx`, `CreateOrder.jsx`, `KitchenBoard.jsx` | - | - | Manual/UI evidence in components | M |
-| FR-14 | Logout/session cleanup | `Navbar.jsx` | `/api/auth/logout/`, `/api/auth/me/` | `Token`, `User` | Auth context tests partly cover state changes | M |
-| FR-15 | Demo payment choice | `PaymentOptions.jsx` | Not persisted | - | UI component evidence only | L |
+| FR-01 | Signup/login | `Login.jsx` | `/api/auth/signup/`, `/api/auth/login/` | `User`, `Token` | `test_signup_api`, `test_login_api`, `Auth.test.jsx` | GREEN / H |
+| FR-02 | Role detection | `Login.jsx` role preview | `SignupSerializer.create` | `User.role` | `test_signup_serializer_customer`, `test_signup_serializer_chef`, `Auth.test.jsx` | GREEN / H |
+| FR-03 | Role routing | `App.jsx`, `Navbar.jsx` | Authenticated API calls | `User.role` | Frontend context tests indirectly | YELLOW / M |
+| FR-04 | Menu browsing | `CreateOrder.jsx` | `GET /api/menu-items/` | `MenuItem`, `AddOn` | `test_menu_items_api` | GREEN / H |
+| FR-05 | Cart management | `CreateOrder.jsx`, `Cart.jsx` | - | Browser state only | `Cart.test.jsx` | GREEN / H |
+| FR-06 | Order submission | `Cart.jsx`, `CheckoutPage.jsx` | `POST /api/orders/` | `Order`, `OrderItem` | `test_create_order_authenticated`, serializer tests | GREEN / H |
+| FR-07 | Order persistence | Kitchen/order screens | `OrderSerializer` | `Order`, `OrderItem`, `MenuItem`, `AddOn`, `User` | `test_order_model`, `test_order_item_model` | GREEN / H |
+| FR-08 | Customer order isolation | `OrderHistory.jsx` | `OrderViewSet.get_queryset` | `Order.created_by` | `test_customer_cannot_see_others_orders` | GREEN / H |
+| FR-09 | FIFO kitchen dashboard | `Dashboard.jsx`, `KitchenBoard.jsx` | `GET /api/dashboard/` | `Order.created_at`, `Order.order_status` | Integration tests support endpoint access | YELLOW / M |
+| FR-10 | Status workflow | `StatusButtons.jsx` | `PATCH /api/orders/{id}/` | `Order.order_status` | `test_chef_can_update_status`, access-control tests | GREEN / H |
+| FR-11 | Ready notification | `Toast.jsx`, `ReadyNotification.jsx` | `ws/orders/`, group broadcast | `Order.created_by_id` in event | `test_order_ready_broadcast` | YELLOW / M |
+| FR-12 | Logout/session cleanup | `Navbar.jsx` | `/api/auth/logout/`, `/api/auth/me/` | `Token`, `User` | Auth context tests partly cover state changes | YELLOW / M |
+| FR-13 | Demo payment choice | `PaymentOptions.jsx` | Not persisted | - | UI component evidence only | RED / L |
+| NFR-01 | Role-based access control | `App.jsx` protected routes | Dashboard/status permission checks | `User.role`, `Order.created_by` | Customer access restriction tests | GREEN / H |
+| NFR-02 | Data integrity boundaries | Forms and API errors | Serializers/models | `Order`, `OrderItem`, `MenuItem`, `AddOn` | Model and serializer boundary tests | GREEN / H |
+| NFR-03 | Notification recovery | `OrderTrackingPage.jsx` | WebSocket + polling endpoints | `Order.order_status` | WebSocket test, component evidence | YELLOW / M |
+| NFR-04 | Empty/loading/error feedback | Cart/menu/kitchen screens | API error handling in services/components | - | Manual component evidence | YELLOW / M |
+| NFR-05 | Busy-period readability | `Dashboard.jsx`, `KitchenBoard.jsx` | FIFO dashboard query | `Order.created_at`, `Order.order_status` | Partial endpoint evidence | YELLOW / M |
 
 ### 4.1 Requirement-to-Implementation Diagram
 
@@ -127,7 +148,7 @@ flowchart LR
 | Item Checked | Result |
 |---|---|
 | Requirements without implementation evidence | None in this D2 report. Low evidence is clearly marked instead of hidden. |
-| Implemented features without requirement mapping | Payment method UI is mapped as FR-15 and marked low because it is UI-only. |
+| Implemented features without requirement mapping | Payment method UI is mapped as FR-13 and marked low because it is UI-only. |
 | Features with missing tests | Route protection, empty UI states, FIFO ordering, and demo payment selection would benefit from more frontend/e2e tests. |
 | Requirements that are outside current implementation | Real payment processing, cashier dashboard, printer integration, and production-grade WebSocket auth are intentionally not claimed. |
 
