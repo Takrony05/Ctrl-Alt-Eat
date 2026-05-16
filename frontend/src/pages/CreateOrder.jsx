@@ -35,6 +35,15 @@ function ItemCard({ item, onAdd }) {
 
   return (
     <div className="menu-card group">
+      {item.image_url && (
+        <div className="mb-4 -mx-4 -mt-4 h-40 overflow-hidden rounded-t-xl border-b border-white/5">
+          <img 
+            src={item.image_url} 
+            alt={item.name} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )}
       <div className="flex items-start justify-between mb-4">
         <h3 className="font-bold text-lg leading-snug" style={{ color: 'var(--cream)' }}>{item.name}</h3>
         <span className="ml-3 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}>

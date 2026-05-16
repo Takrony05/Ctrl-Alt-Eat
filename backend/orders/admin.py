@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, MenuItem, Order, OrderItem
+from .models import User, MenuItem, Order, OrderItem, AddOn
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
@@ -14,8 +14,12 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ['name', 'category', 'price']
+    list_display = ['name', 'category', 'price', 'image_url']
     list_filter = ['category']
+
+@admin.register(AddOn)
+class AddOnAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price']
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
