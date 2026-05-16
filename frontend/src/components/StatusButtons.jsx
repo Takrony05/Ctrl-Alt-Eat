@@ -1,13 +1,6 @@
 import React, { useState } from 'react';
+import { CheckCircleIcon, PackageIcon } from './Icons';
 
-/**
- * StatusButtons — renders the correct action button based on the order's
- * current status and calls onStatusChange(orderId, newStatus) on click.
- *
- * Status flow handled here:
- *   in_progress  →  [Mark as Ready]     → ready
- *   ready        →  [Mark as Delivered] → delivered  (disappears from board)
- */
 export default function StatusButtons({ order, onStatusChange }) {
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
@@ -24,46 +17,45 @@ export default function StatusButtons({ order, onStatusChange }) {
     }
   };
 
-  // Order is in_progress → show "Mark as Ready"
   if (order.order_status === 'in_progress') {
     return (
       <div>
         <button
           onClick={() => handleChange('ready')}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-orange-200"
+          className="w-full flex items-center justify-center gap-2 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ background: 'linear-gradient(135deg, var(--orange), var(--orange-dark))', color: 'white', boxShadow: '0 4px 15px rgba(232,146,60,0.3)' }}
         >
           {loading ? (
-            <><span className="spinner spinner-white" /> Updating…</>
+            <><span className="spinner spinner-white" /> Updating...</>
           ) : (
-            <><span>🔔</span> Mark as Ready</>
+            <><CheckCircleIcon /> Mark as Ready</>
           )}
         </button>
-        {error && <p className="text-red-500 text-xs mt-1.5 text-center">{error}</p>}
+        {error && <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--danger)' }}>{error}</p>}
       </div>
     );
   }
 
-  // Order is ready → show "Mark as Delivered"
   if (order.order_status === 'ready') {
     return (
       <div>
         <button
           onClick={() => handleChange('delivered')}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed shadow-md shadow-emerald-200"
+          className="w-full flex items-center justify-center gap-2 font-bold py-2.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+          style={{ background: 'linear-gradient(135deg, var(--success-dark), var(--success))', color: 'white', boxShadow: '0 4px 15px rgba(52,211,153,0.3)' }}
         >
           {loading ? (
-            <><span className="spinner spinner-white" /> Updating…</>
+            <><span className="spinner spinner-white" /> Updating...</>
           ) : (
-            <><span>📦</span> Mark as Delivered</>
+            <><PackageIcon /> Mark as Delivered</>
           )}
         </button>
-        {error && <p className="text-red-500 text-xs mt-1.5 text-center">{error}</p>}
+        {error && <p className="text-xs mt-1.5 text-center" style={{ color: 'var(--danger)' }}>{error}</p>}
       </div>
     );
   }
 
-  // Any other status — no action available
   return null;
 }

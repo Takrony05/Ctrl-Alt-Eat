@@ -1,20 +1,22 @@
 import React from 'react';
 import StatusButtons from './StatusButtons';
+import { ClockIcon, NoteIcon, ChefHatIcon } from './Icons';
 
 const STATUS_CONFIG = {
   in_progress: {
-    label: '⏳ In Progress',
+    label: 'In Progress',
     cardClass: 'order-card',
     badgeClass: 'bg-amber-100 text-amber-700 border-amber-200',
+    badgeStyle: { background: 'rgba(232,146,60,0.12)', color: 'var(--orange-light)', border: '1px solid rgba(232,146,60,0.25)' }
   },
   ready: {
-    label: '✅ Ready',
+    label: 'Ready',
     cardClass: 'order-card order-card-ready',
     badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    badgeStyle: { background: 'rgba(52,211,153,0.12)', color: 'var(--success)', border: '1px solid rgba(52,211,153,0.25)' }
   },
 };
 
-// ── Individual order card ─────────────────────────────────
 function OrderCard({ order, onStatusChange }) {
   const config  = STATUS_CONFIG[order.order_status] || {};
   const created = new Date(order.created_at);
@@ -25,28 +27,28 @@ function OrderCard({ order, onStatusChange }) {
       {/* Card header */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--cream-subtle)' }}>
             Order #{order.id}
           </p>
-          <h3 className="text-xl font-extrabold text-white mt-0.5">
+          <h3 className="text-xl font-extrabold mt-0.5" style={{ color: 'var(--cream)' }}>
             Table {order.table_number}
           </h3>
           {order.created_by_name && (
-            <p className="text-xs text-white/60 mt-0.5">by {order.created_by_name}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--cream-muted)' }}>by {order.created_by_name}</p>
           )}
         </div>
 
         <div className="flex flex-col items-end gap-2">
           {/* Status badge */}
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${config.badgeClass || ''}`}>
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5" style={config.badgeStyle}>
             {config.label || order.order_status}
           </span>
 
           {/* Time info */}
-          <span className="text-xs text-gray-400">
-            🕐 {created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <span className="text-xs flex items-center gap-1" style={{ color: 'var(--cream-muted)' }}>
+            <ClockIcon /> {created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </span>
-          <span className={`text-xs font-semibold ${elapsed > 10 ? 'text-red-500' : 'text-gray-400'}`}>
+          <span className={`text-xs font-semibold ${elapsed > 10 ? 'text-red-400 animate-pulse' : ''}`} style={{ color: elapsed > 10 ? 'var(--danger)' : 'var(--cream-subtle)' }}>
             {elapsed < 1 ? 'Just now' : `${elapsed}m waiting`}
           </span>
         </div>
@@ -57,20 +59,21 @@ function OrderCard({ order, onStatusChange }) {
         {order.items.map((item) => (
           <li key={item.id} className="flex items-start gap-3 text-sm">
             {/* Quantity bubble */}
-            <span className="flex-shrink-0 w-6 h-6 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
+            <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mt-0.5" style={{ background: 'rgba(232,146,60,0.12)', color: 'var(--orange-light)' }}>
               {item.quantity}
             </span>
 
             <div className="flex-1">
-              <span className="font-bold text-white">{item.menu_item_name}</span>
+              <span className="font-bold" style={{ color: 'var(--cream)' }}>{item.menu_item_name}</span>
 
-              {/* Add-ons — highlighted badges so chef can't miss them */}
+              {/* Add-ons */}
               {item.selected_addons?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {item.selected_addons.map((addon) => (
                     <span
                       key={addon.id}
-                      className="inline-block bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full"
+                      className="inline-block text-xs font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: 'rgba(250,243,232,0.04)', border: '1px solid var(--border)', color: 'var(--cream-muted)' }}
                     >
                       + {addon.name}
                     </span>
@@ -80,8 +83,8 @@ function OrderCard({ order, onStatusChange }) {
 
               {/* Special notes */}
               {item.notes && (
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2 py-1 mt-1 italic">
-                  📝 {item.notes}
+                <p className="text-xs rounded-lg px-2 py-1.5 mt-1.5 italic flex items-start gap-1.5" style={{ background: 'rgba(232,146,60,0.06)', border: '1px solid rgba(232,146,60,0.15)', color: 'var(--orange-light)' }}>
+                  <NoteIcon className="flex-shrink-0 mt-0.5" /> {item.notes}
                 </p>
               )}
             </div>
@@ -95,7 +98,6 @@ function OrderCard({ order, onStatusChange }) {
   );
 }
 
-// ── Kitchen board (sorts FIFO on the frontend as a safety backup) ──
 export default function KitchenBoard({ orders, onStatusChange }) {
   const sortedOrders = [...orders].sort(
     (a, b) => new Date(a.created_at) - new Date(b.created_at)
@@ -104,9 +106,11 @@ export default function KitchenBoard({ orders, onStatusChange }) {
   if (sortedOrders.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="text-6xl mb-4">👨‍🍳</div>
-        <h3 className="text-xl font-bold text-white/70 mb-2">No active orders right now.</h3>
-        <p className="text-white/40">New orders will appear here automatically.</p>
+        <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4" style={{ background: 'rgba(250,243,232,0.04)', color: 'var(--cream-muted)' }}>
+          <ChefHatIcon />
+        </div>
+        <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--cream)' }}>No active orders right now.</h3>
+        <p style={{ color: 'var(--cream-subtle)' }}>New orders will appear here automatically.</p>
       </div>
     );
   }
