@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { placeOrder } from '../services/api';
 import PaymentOptions from '../components/PaymentOptions';
-import { CartIcon, ArrowLeftIcon, PlusIcon, MinusIcon, TrashIcon } from '../components/Icons';
+import { CartIcon, ArrowLeftIcon, PlusIcon, MinusIcon, TrashIcon, MainMealIcon, DessertIcon, DrinkIcon, SideIcon, PlateIcon } from '../components/Icons';
+
+const CATEGORY_ICONS = {
+  'Main Meal': <MainMealIcon />,
+  'Dessert':   <DessertIcon />,
+  'Drink':     <DrinkIcon />,
+  'Side':      <SideIcon />,
+};
 
 export default function Cart() {
   const { cartItems, removeFromCart, decrementItem, addToCart, clearCart, grandTotal, totalItems } = useCart();
@@ -73,7 +80,19 @@ export default function Cart() {
           const addonExtra = c.selectedAddons.reduce((s, a) => s + parseFloat(a.price || 0), 0);
           const lineTotal  = (parseFloat(c.menuItem.price) + addonExtra) * c.quantity;
           return (
-            <div key={idx} className="glass-card p-4 rounded-2xl flex items-start gap-4">
+            <div key={idx} className="glass-card p-4 rounded-2xl flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl flex-shrink-0 relative overflow-hidden bg-[rgba(var(--glass-color),0.02)] border" style={{ borderColor: 'var(--border)' }}>
+                {c.menuItem.image_url ? (
+                  <img src={c.menuItem.image_url} alt={c.menuItem.name} className="w-full h-full object-cover" 
+                    onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }} />
+                ) : null}
+                <div className={`absolute inset-0 items-center justify-center ${c.menuItem.image_url ? 'hidden' : 'flex'}`}>
+                  <span className="text-2xl opacity-20" style={{ color: 'var(--cream)' }}>
+                     {CATEGORY_ICONS[c.menuItem.category] || <PlateIcon />}
+                  </span>
+                </div>
+              </div>
+              
               <div className="flex-1 min-w-0">
                 <p className="font-bold truncate" style={{ color: 'var(--cream)' }}>{c.menuItem.name}</p>
                 {c.selectedAddons.length > 0 && (

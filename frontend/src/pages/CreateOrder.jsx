@@ -34,12 +34,29 @@ function ItemCard({ item, onAdd }) {
   const totalPrice = (parseFloat(item.price) + addonExtra).toFixed(2);
 
   return (
-    <div className="menu-card group">
-      <div className="flex items-start justify-between mb-4">
-        <h3 className="font-bold text-lg leading-snug" style={{ color: 'var(--cream)' }}>{item.name}</h3>
-        <span className="ml-3 flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{ background: 'rgba(232,146,60,0.1)', color: 'var(--orange)' }}>
+    <div className="menu-card group relative overflow-hidden flex flex-col">
+      <div className="-mt-5 -mx-5 mb-4 relative h-48 flex-shrink-0 bg-[rgba(var(--glass-color),0.02)]" style={{ borderBottom: '1px solid var(--border)' }}>
+        {item.image_url ? (
+          <img 
+            src={item.image_url} 
+            alt={item.name} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        <div className={`absolute inset-0 items-center justify-center ${item.image_url ? 'hidden' : 'flex'}`}>
+           <span className="text-6xl opacity-10" style={{ color: 'var(--cream)' }}>{CATEGORY_ICONS[item.category] || <PlateIcon />}</span>
+        </div>
+        <div className="absolute top-3 right-3 w-9 h-9 rounded-xl flex items-center justify-center text-lg shadow-lg backdrop-blur-md border z-10" style={{ background: 'rgba(var(--glass-color), 0.4)', borderColor: 'var(--border)', color: 'var(--orange)' }}>
           {CATEGORY_ICONS[item.category] || <PlateIcon />}
-        </span>
+        </div>
+      </div>
+
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="font-bold text-xl leading-snug" style={{ color: 'var(--cream)' }}>{item.name}</h3>
       </div>
 
       {item.description && (
