@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -51,7 +51,7 @@ function AppInner() {
       const id = Date.now();
       setToasts((prev) => [
         ...prev,
-        { id, message: event.message || 'Your order is ready to be picked up!' },
+        { id, message: event.message || 'Your order is ready!' },
       ]);
     }
   }, [user]);
@@ -63,7 +63,7 @@ function AppInner() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <main>
         <Routes>
