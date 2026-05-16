@@ -6,13 +6,11 @@
 **Project:** Ctrl-Alt-Eat Kitchen Display System  
 **Subsystem:** Kitchen Display System with customer ordering support  
 **Team Members:**  
-- [Student Name 1] - [ID]
-- [Student Name 2] - [ID]
-- [Student Name 3] - [ID]
-- [Student Name 4] - [ID]
-- [Student Name 5] - [ID]
-
-**Submission Date:** 18 May 2026
+- Adnan Ahmed - 120230008
+- Mohamed Ashraf - 120230056
+- Ahmed El-Shazly - 120230062
+- Abdelrahman Adel - 120230073
+- Seif Fayed - 120230091
 
 ---
 
