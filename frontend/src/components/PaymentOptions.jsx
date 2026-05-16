@@ -1,26 +1,27 @@
 import React from 'react';
+import { CreditCardIcon, VisaLogo, MastercardLogo, AmexLogo, ApplePayLogo, GooglePayLogo } from './Icons';
 
 const METHODS = [
   {
     id: 'card',
     label: 'Credit / Debit Card',
     sublabel: 'Visa, Mastercard, Amex',
-    icon: '💳',
-    brands: ['VISA', 'MC', 'AMEX'],
+    icon: <CreditCardIcon />,
+    brands: [<VisaLogo key="v" />, <MastercardLogo key="m" />, <AmexLogo key="a" />],
   },
   {
     id: 'apple',
     label: 'Apple Pay',
     sublabel: 'Touch ID or Face ID',
-    icon: '',
-    brands: ['🍎 Pay'],
+    icon: null,
+    brands: [<ApplePayLogo key="ap" />],
   },
   {
     id: 'google',
     label: 'Google Pay',
     sublabel: 'Pay with Google',
-    icon: '',
-    brands: ['G Pay'],
+    icon: null,
+    brands: [<GooglePayLogo key="gp" />],
   },
 ];
 
@@ -34,46 +35,31 @@ export default function PaymentOptions({ selected, onSelect }) {
             key={method.id}
             id={`payment-${method.id}`}
             onClick={() => onSelect(method.id)}
-            className={`w-full text-left rounded-2xl p-4 transition-all duration-300 border ${
-              isSelected
-                ? 'bg-orange-500/10 border-orange-500/40 glow-amber-sm'
-                : 'glass border-white/8 hover:border-white/16 hover:bg-white/5'
-            }`}
+            className="w-full text-left rounded-2xl p-4 transition-all duration-300"
+            style={{
+              background: isSelected ? 'rgba(232,146,60,0.08)' : 'rgba(250,243,232,0.03)',
+              border: `1px solid ${isSelected ? 'rgba(232,146,60,0.35)' : 'var(--border)'}`,
+              boxShadow: isSelected ? '0 0 15px rgba(232,146,60,0.12)' : 'none',
+            }}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {/* Radio indicator */}
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${
-                    isSelected ? 'border-orange-500' : 'border-white/20'
-                  }`}
-                >
-                  {isSelected && (
-                    <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                  )}
+                {/* Radio */}
+                <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-300"
+                  style={{ borderColor: isSelected ? 'var(--orange)' : 'var(--border)' }}>
+                  {isSelected && <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--orange)' }} />}
                 </div>
-
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xl">{method.icon}</span>
-                    <span className="text-white font-semibold text-sm">{method.label}</span>
+                    {method.icon && <span className="text-xl" style={{ color: 'var(--orange)' }}>{method.icon}</span>}
+                    <span className="font-semibold text-sm" style={{ color: 'var(--cream)' }}>{method.label}</span>
                   </div>
-                  <p className="text-white/35 text-xs mt-0.5 ml-7">{method.sublabel}</p>
+                  <p className="text-xs mt-0.5 ml-7" style={{ color: 'var(--cream-subtle)' }}>{method.sublabel}</p>
                 </div>
               </div>
-
-              {/* Brand chips */}
-              <div className="flex gap-1.5">
-                {method.brands.map(brand => (
-                  <span
-                    key={brand}
-                    className="px-2 py-1 rounded-md text-xs font-bold border"
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      borderColor: 'rgba(255,255,255,0.1)',
-                      color: 'rgba(255,255,255,0.5)',
-                    }}
-                  >
+              <div className="flex gap-2 items-center">
+                {method.brands.map((brand, i) => (
+                  <span key={i} className="flex items-center px-2 py-1 rounded-md" style={{ background: 'rgba(250,243,232,0.06)', border: '1px solid var(--border)' }}>
                     {brand}
                   </span>
                 ))}
