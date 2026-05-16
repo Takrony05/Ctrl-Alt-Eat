@@ -6,10 +6,11 @@ import PaymentOptions from '../components/PaymentOptions';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, grandTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [payMethod, setPayMethod] = useState('card');
+  const [tableNumber, setTableNumber] = useState(1);
 
   async function handlePlaceOrder() {
     if (cartItems.length === 0) {
@@ -21,18 +22,18 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       const payload = {
-        items: cartItems.map(item => ({
-          menu_item: item.menu_item,
+        table_number: tableNumber,
+        items: cartItems.map((item) => ({
+          menu_item: item.menuItem.id,
           quantity: item.quantity,
-          selected_addons: (item.selected_addons || []).map(a => typeof a === 'object' ? a.id : a),
+          selected_addons: (item.selectedAddons || []).map((addon) => addon.id),
           notes: item.notes || '',
         })),
       };
+
       const res = await orderAPI.create(payload);
-      const orderId = res.data.id;
-      // We don't clear cart here for the demo so user can re-order if they want, 
-      // but in real app we might. Let's keep it minimal.
-      navigate(`/tracking/${orderId}`);
+      clearCart();
+      navigate(`/tracking/${res.data.id}`);
     } catch (err) {
       const msg =
         err.response?.data?.detail ||
@@ -43,6 +44,14 @@ export default function CheckoutPage() {
     }
   }
 
+  const lineTotal = (item) => {
+    const addonTotal = (item.selectedAddons || []).reduce(
+      (sum, addon) => sum + Number(addon.price || 0),
+      0
+    );
+    return (Number(item.menuItem.price) + addonTotal) * item.quantity;
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden flex flex-col items-center py-12 px-6">
       <div className="w-full max-w-2xl animate-fade-in-up">
@@ -52,35 +61,57 @@ export default function CheckoutPage() {
         </header>
 
         <main className="space-y-8">
-          {/* Order summary */}
           <section className="card glass">
-            <h2 className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4">Order Summary</h2>
+            <h2 className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4">
+              Order Summary
+            </h2>
+
+            <label className="block text-white/50 text-xs font-semibold uppercase tracking-wider mb-2">
+              Table Number
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={tableNumber}
+              onChange={(event) => setTableNumber(Number(event.target.value))}
+              className="mb-5 w-28 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-orange-400"
+            />
+
             <div className="space-y-4">
               {cartItems.length === 0 ? (
                 <p className="text-white/30 italic">No items in cart</p>
               ) : (
                 cartItems.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-start border-b border-white/5 pb-4 last:border-0 last:pb-0">
+                  <div
+                    key={idx}
+                    className="flex justify-between items-start border-b border-white/5 pb-4 last:border-0 last:pb-0"
+                  >
                     <div>
-                      <p className="font-bold">{item.quantity}× {item.name}</p>
-                      {item.add_ons?.length > 0 && (
-                        <p className="text-xs text-white/40 mt-1">{item.add_ons.join(', ')}</p>
+                      <p className="font-bold">{item.quantity}x {item.menuItem.name}</p>
+                      {item.selectedAddons?.length > 0 && (
+                        <p className="text-xs text-white/40 mt-1">
+                          {item.selectedAddons.map((addon) => addon.name).join(', ')}
+                        </p>
                       )}
                     </div>
-                    <span className="font-bold text-amber-400">${(item.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-bold text-amber-400">
+                      ${lineTotal(item).toFixed(2)}
+                    </span>
                   </div>
                 ))
               )}
               <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                 <span className="text-xl font-bold">Total</span>
-                <span className="text-3xl font-black gradient-text">${cartTotal.toFixed(2)}</span>
+                <span className="text-3xl font-black gradient-text">${grandTotal.toFixed(2)}</span>
               </div>
             </div>
           </section>
 
-          {/* Payment */}
           <section>
-            <h2 className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4 px-2">Select Payment</h2>
+            <h2 className="text-white/50 text-xs font-semibold uppercase tracking-wider mb-4 px-2">
+              Select Payment
+            </h2>
             <PaymentOptions selected={payMethod} onSelect={setPayMethod} />
           </section>
 
@@ -96,7 +127,7 @@ export default function CheckoutPage() {
             disabled={loading || cartItems.length === 0}
             className="btn-primary w-full py-5 text-xl font-black shadow-2xl animate-pulse-glow"
           >
-            {loading ? 'Processing...' : `Pay & Order Now`}
+            {loading ? 'Processing...' : 'Pay & Order Now'}
           </button>
 
           <p className="text-center text-white/20 text-xs">
