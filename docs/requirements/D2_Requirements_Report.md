@@ -143,6 +143,8 @@ flowchart LR
     WS --> NOTICE[Customer Notification]
 ```
 
+![Requirement Traceability Diagram](requirement_traceability_diagram.png)
+
 ### 4.2 Orphan Check
 
 | Item Checked | Result |
