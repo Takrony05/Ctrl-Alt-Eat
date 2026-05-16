@@ -3,7 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { orderAPI } from '../services/api';
 import PaymentOptions from '../components/PaymentOptions';
-import { RocketIcon } from '../components/Icons';
+import { RocketIcon, MainMealIcon, DessertIcon, DrinkIcon, SideIcon, PlateIcon } from '../components/Icons';
+
+const CATEGORY_ICONS = {
+  'Main Meal': <MainMealIcon />,
+  'Dessert':   <DessertIcon />,
+  'Drink':     <DrinkIcon />,
+  'Side':      <SideIcon />,
+};
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -61,12 +68,25 @@ export default function CheckoutPage() {
                 <p className="italic" style={{ color: 'var(--cream-subtle)' }}>No items in cart</p>
               ) : (
                 cartItems.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-start pb-4 last:border-0 last:pb-0" style={{ borderBottom: '1px solid var(--border)' }}>
-                    <div>
-                      <p className="font-bold" style={{ color: 'var(--cream)' }}>{item.quantity}× {item.menuItem.name}</p>
-                      {item.selectedAddons?.length > 0 && (
-                        <p className="text-xs mt-1" style={{ color: 'var(--cream-subtle)' }}>{item.selectedAddons.map(a => a.name).join(', ')}</p>
-                      )}
+                  <div key={idx} className="flex justify-between items-center pb-4 last:border-0 last:pb-0" style={{ borderBottom: '1px solid var(--border)' }}>
+                    <div className="flex gap-4 items-center">
+                      <div className="w-12 h-12 rounded-lg flex-shrink-0 relative overflow-hidden bg-[rgba(var(--glass-color),0.02)] border" style={{ borderColor: 'var(--border)' }}>
+                        {item.menuItem.image_url ? (
+                          <img src={item.menuItem.image_url} alt={item.menuItem.name} className="w-full h-full object-cover" 
+                            onError={(e) => { e.target.style.display = 'none'; if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; }} />
+                        ) : null}
+                        <div className={`absolute inset-0 items-center justify-center ${item.menuItem.image_url ? 'hidden' : 'flex'}`}>
+                          <span className="text-xl opacity-20" style={{ color: 'var(--cream)' }}>
+                             {CATEGORY_ICONS[item.menuItem.category] || <PlateIcon />}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-bold" style={{ color: 'var(--cream)' }}>{item.quantity}× {item.menuItem.name}</p>
+                        {item.selectedAddons?.length > 0 && (
+                          <p className="text-xs mt-1" style={{ color: 'var(--cream-subtle)' }}>{item.selectedAddons.map(a => a.name).join(', ')}</p>
+                        )}
+                      </div>
                     </div>
                     <span className="font-bold" style={{ color: 'var(--orange)' }}>
                       ${((parseFloat(item.menuItem.price) + item.selectedAddons.reduce((s, a) => s + parseFloat(a.price || 0), 0)) * item.quantity).toFixed(2)}
