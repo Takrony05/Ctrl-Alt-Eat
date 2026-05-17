@@ -17,11 +17,16 @@ Feature: Kitchen Display System (KDS)
     When I view the dashboard
     Then Order #15 should appear before Order #16
 
-  Scenario: KDS-03 Status transition (Mark as Ready)
-    Given Order #15 has status "in_progress"
-    When I click "Mark as Ready" on Order #15
-    Then the order status should update to "ready"
-    And the customer should receive a notification
+  Scenario Outline: KDS-03 Status transitions
+    Given Order #15 has status "<current_status>"
+    When I click "<button_action>" on Order #15
+    Then the order status should update to "<new_status>"
+    And the customer should receive a "<notification>" notification
+
+    Examples:
+      | current_status | button_action     | new_status  | notification      |
+      | in_progress    | Mark as Ready     | ready       | Order is ready!   |
+      | ready          | Mark as Delivered | delivered   | Enjoy your meal!  |
 
   Scenario: KDS-04 Empty dashboard
     Given there are no orders with status "in_progress" or "ready"

@@ -1,0 +1,183 @@
+CSE323 — Software Engineering  
+Term Project: The Full Engineering Cycle  
+Evaluation Criteria & Grading Rubric  - Spring 2026  
+01  GROUP FORMATION & PROJECT SCOPE  
+Rule Details  
+Group Size  Minimum 3 members — Maximum 5 members  
+Sub-system Choice  Each group selects one sub -system  for example : 
+  •  Customer Ordering System  
+  •  Kitchen Display System  
+  •  Management Analytics System  
+you can choose your own sub system those are onl y examples  
+AI Disclosure  All AI -assisted code must be disclosed; prompts used must appear in the 
+appendix  
+ 
+02  DELIVERABLES  
+Groups must submit ALL of the following deliverables by 18 / 05 / 2026 .   
+# Deliverable  Format  
+D1 Project Registration Form  
+Group members, roles, and chosen sub -system  Google Form  
+D2 Requirements Report  
+Actor classification, traceability heatmap, persona 
+discovery (≥ 5 edge cases)  PDF (max 6 p oints) 
+D3 Design Specification  
+Gherkin scripts, UML diagrams (SSD + Activity), 
+API contracts, QA audit log  PDF (max 10 p oints ) 
+D4 Validation Report  
+Test pyramid results, Playwright scripts, 
+Verification vs Validation statement  PDF (max 8 p oints )  
+Note that you will del iver all parts (D2,D3,D4 ) 
+in one pdf file   
+D5 Implementation Package  
+Source code + TDP evidence (failing → passing 
+tests), vertical slice demo (screen recording ≤ 5 
+min) All project files+ GitHub  link + video link  
+D6 Final Presentation Slide Deck  
+Submitted before the demo session  PPTX or PDF  
+ 
+ 
+ 
+ 
+ 
+ 
+ 03  GRADING RUBRIC  (Total: 30 Marks)  
+Each phase is assessed holistically across three performance levels: Excellent  (full marks), Satisfactory  
+(partial marks), and Insufficient  (zero).  Partial marks within each band are awarded at the marker's 
+discretion.  
+Phase 1 — Requirement Discovery & Traceability  
+Criterion  Excellent (Full Marks)  Satisfactory (Partial)  Insufficient (Zero)  
+Actor Classification  All three actor types 
+(Primary, Supporting, 
+Offstage) correctly 
+identified with clear 
+rationale  Two actor types defined; 
+minor omissions or 
+unclear rationale  One or no actor types 
+addressed  
+Traceability Heatmap  Complete matrix with zero 
+orphaned requirements  
+every feature are 
+implemented and  justified  Matrix present but 1 –2 
+orphaned requirements or 
+missing justifications  No matrix, or matrix is 
+largely incomplete  
+Persona Discovery  At least 5 hidden 
+requirements or edge 
+cases uncovered via AI 
+user avatar with clear 
+reasoning  3–4 edge cases 
+uncovered; some lack 
+depth or justification  Fewer than 3 edge cases 
+or persona exercise not 
+conducted  
+Phase 2 — Design & Specification  
+Criterion  Excellent (Full Marks)  Satisfactory (Partial)  Insufficient (Zero)  
+Gherkin Scripts  All core user stories 
+translated to well -formed 
+Given/When/Then with 
+scenario outlines where 
+appropriate  Most stories covered; 
+minor syntax issues or 
+missing edge scenarios  Fewer than half of stories 
+covered, or Gherkin 
+syntax incorrect 
+throughout  
+QA Refinement Loop  All vague adjectives 
+replaced with measurable 
+metrics; senior QA audit 
+log provided  to eliminate 
+unquantifiable adjectives 
+like "fast" or "secure" and 
+replace them with 
+measurable technical 
+metrics.  Most adjectives quantified; 
+1–2 remain vague  Vague terms remain 
+unquantified; no audit log  
+UML Diagrams  Correct SSD  (System 
+Sequence Diagrams ) 
+(happy + failure paths) 
+and Activity diagram with 
+code decision points; 
+notation accurate  Diagrams present but 
+missing failure path or 
+decision points; minor 
+notation errors  Diagrams missing or 
+fundamentally incorrect  
+API Contracts & 
+Information Hiding  Clear interface definitions; 
+internal stack fully hidden; 
+contracts enable 
+independent development  Interfaces defined but 
+some internal details leak 
+or contracts are 
+incomplete  No API contracts or no 
+separation of interface 
+from implementation  
+ 
+ 
+ Phase 3 — Test-Driven Implementation  
+Criterion  Excellent (Full Marks)  Satisfactory (Partial)  Insufficient (Zero)  
+Failing Test First  Failing unit tests written 
+before implementation; 
+tests establish a clear 
+mathematical boundary  Tests written but some 
+produced after code, or 
+boundaries poorly defined  No failing -first evidence, 
+or tests absent  
+Edge Case Cage 
+(Padlocks)  Boundary, threshold, and 
+extreme constraints all 
+addressed; AI 
+hallucination blocked for 
+all cases  At least two padlock types 
+applied; some edge cases 
+unaddressed  Padlocks absent or only 
+one constraint type 
+applied  
+TDP Iteration  Iterative prompting 
+documented; final code 
+demonstrably fits the test 
+boundary; prompt 
+appendix complete  Some iteration shown; 
+minor misalignment 
+between test and final 
+logic No iteration documented; 
+code does not match test 
+boundary  
+Vertical Slicing  UI / Logic / DB delivered 
+as one working vertical 
+slice; failure resilience 
+demonstrated  Vertical slice partially 
+working; one layer missing 
+or not integrated  No vertical slice; 
+monolithic or incomplete 
+implementation  
+Phase 4 — Validation & Pipeline Engineering  
+Criterion  Excellent (Full Marks)  Satisfactory (Partial)  Insufficient (Zero)  
+Testing Pyramid  70% Unit / 20% 
+Integration / 10% E2E 
+ratio achieved and 
+evidenced with a test 
+report  Ratio attempted but 
+deviates by more than 
+15% in any layer  Testing pyramid not 
+followed or no test report 
+provided  
+Playwright Automation  Gherkin scenarios fully 
+converted to executable 
+Playwright scripts using 
+the Page Object Model  Scripts present but POM 
+not applied, or not all 
+scenarios covered  No Playwright scripts, or 
+scripts not linked to 
+Gherkin  
+Verification vs 
+Validation Statement  Clear written statement 
+distinguishing what was 
+verified (works) vs 
+validated (right problem), 
+with evidence  Statement present but 
+conflates the two concepts 
+or lacks evidence  No distinction made, or 
+statement absent  
+ 
