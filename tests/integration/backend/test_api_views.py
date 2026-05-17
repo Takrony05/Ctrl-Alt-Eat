@@ -59,6 +59,19 @@ class TestAPIViews:
         order.refresh_from_db()
         assert order.order_status == "ready"
 
+    def test_customer_cannot_update_status(self, api_client, customer_user):
+        order = Order.objects.create(table_number=5, created_by=customer_user)
+        api_client.force_authenticate(user=customer_user)
+        response = api_client.patch(f"/api/orders/{order.id}/", {"order_status": "ready"}, format='json')
+        assert response.status_code == 403
+        order.refresh_from_db()
+        assert order.order_status == "in_progress"
+
+    def test_customer_cannot_open_kitchen_dashboard(self, api_client, customer_user):
+        api_client.force_authenticate(user=customer_user)
+        response = api_client.get("/api/dashboard/")
+        assert response.status_code == 403
+
     def test_customer_cannot_see_others_orders(self, api_client, customer_user):
         other_user = User.objects.create_user(username="other", email="other@gmail.com", password="password")
         Order.objects.create(table_number=1, created_by=other_user)

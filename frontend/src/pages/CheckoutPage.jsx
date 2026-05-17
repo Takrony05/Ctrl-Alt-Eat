@@ -14,10 +14,11 @@ const CATEGORY_ICONS = {
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, grandTotal } = useCart();
+  const { cartItems, grandTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [payMethod, setPayMethod] = useState('card');
+  const [tableNumber, setTableNumber] = useState(1);
 
   async function handlePlaceOrder() {
     if (cartItems.length === 0) {
@@ -29,18 +30,18 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       const payload = {
+        table_number: tableNumber,
         items: cartItems.map(item => ({
-          menu_item: item.menuItem.id, // using menuItem because CartContext sets it as such
+          menu_item: item.menuItem.id,
           quantity: item.quantity,
           selected_addons: (item.selectedAddons || []).map(a => typeof a === 'object' ? a.id : a),
           notes: item.notes || '',
         })),
       };
+
       const res = await orderAPI.create(payload);
-      const orderId = res.data.id;
-      // We don't clear cart here for the demo so user can re-order if they want, 
-      // but in real app we might. Let's keep it minimal.
-      navigate(`/tracking/${orderId}`);
+      clearCart();
+      navigate(`/tracking/${res.data.id}`);
     } catch (err) {
       const msg =
         err.response?.data?.detail ||
@@ -51,6 +52,14 @@ export default function CheckoutPage() {
     }
   }
 
+  const lineTotal = (item) => {
+    const addonTotal = (item.selectedAddons || []).reduce(
+      (sum, addon) => sum + Number(addon.price || 0),
+      0
+    );
+    return (Number(item.menuItem.price) + addonTotal) * item.quantity;
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center py-12 px-6" style={{ background: 'var(--bg-primary)' }}>
       <div className="w-full max-w-2xl animate-fade-in-up relative z-10">
@@ -60,9 +69,25 @@ export default function CheckoutPage() {
         </header>
 
         <main className="space-y-8">
-          {/* Order summary */}
           <section className="card">
             <h2 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--cream-subtle)' }}>Order Summary</h2>
+
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--cream-subtle)' }}>
+              Table Number
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              value={tableNumber}
+              onChange={(event) => setTableNumber(Number(event.target.value))}
+              className="mb-5 w-28 rounded-xl px-3 py-2 outline-none border focus:border-[var(--orange)]"
+              style={{
+                background: 'rgba(var(--glass-color), 0.04)',
+                borderColor: 'var(--border)',
+                color: 'var(--cream)'
+              }}
+            />
             <div className="space-y-4">
               {cartItems.length === 0 ? (
                 <p className="italic" style={{ color: 'var(--cream-subtle)' }}>No items in cart</p>
@@ -89,7 +114,7 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <span className="font-bold" style={{ color: 'var(--orange)' }}>
-                      ${((parseFloat(item.menuItem.price) + item.selectedAddons.reduce((s, a) => s + parseFloat(a.price || 0), 0)) * item.quantity).toFixed(2)}
+                      ${lineTotal(item).toFixed(2)}
                     </span>
                   </div>
                 ))
@@ -101,7 +126,6 @@ export default function CheckoutPage() {
             </div>
           </section>
 
-          {/* Payment */}
           <section>
             <h2 className="text-xs font-semibold uppercase tracking-wider mb-4 px-2" style={{ color: 'var(--cream-subtle)' }}>Select Payment</h2>
             <PaymentOptions selected={payMethod} onSelect={setPayMethod} />
