@@ -1,6 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const WS_URL = 'ws://localhost:8000/ws/orders/';
+const BACKEND_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+const WS_URL = BACKEND_URL
+  .replace(/^http:/, 'ws:')
+  .replace(/^https:/, 'wss:')
+  .replace(/\/api\/?$/, '/ws/orders/');
 
 /**
  * useOrderSocket — connects to the Django Channels WebSocket and calls

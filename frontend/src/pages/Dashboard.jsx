@@ -9,6 +9,7 @@ export default function Dashboard() {
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
   const [lastPoll, setLastPoll] = useState(null);
+  const [isLive, setIsLive]     = useState(true);
 
   const fetchOrders = useCallback(() => {
     getKitchenOrders()
@@ -23,10 +24,16 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
+    if (!isLive) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     fetchOrders();
     const interval = setInterval(fetchOrders, 5000);
     return () => clearInterval(interval);
-  }, [fetchOrders]);
+  }, [fetchOrders, isLive]);
 
   const handleStatusChange = useCallback(async (orderId, newStatus) => {
     try {
@@ -53,14 +60,22 @@ export default function Dashboard() {
             <span className="stat-chip stat-pending">{inProgressCount} In Progress</span>
             <span className="stat-chip stat-ready">{readyCount} Ready</span>
           </div>
-          <div className="flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full" style={{ background: 'rgba(52,211,153,0.1)', color: 'var(--success)' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--success)' }} />
-            Live
-          </div>
+          <button 
+            onClick={() => setIsLive(prev => !prev)}
+            className="flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            style={{ 
+              background: isLive ? 'rgba(52,211,153,0.1)' : 'rgba(239,68,68,0.1)', 
+              color: isLive ? 'var(--success)' : '#ef4444',
+              border: isLive ? '1px solid rgba(52,211,153,0.2)' : '1px solid rgba(239,68,68,0.2)'
+            }}
+          >
+            <span className={`w-2 h-2 rounded-full ${isLive ? 'animate-pulse' : ''}`} style={{ background: isLive ? 'var(--success)' : '#ef4444' }} />
+            {isLive ? 'Live' : 'Offline'}
+          </button>
         </div>
       </div>
 
-      {lastPoll && (
+      {isLive && lastPoll && (
         <p className="text-xs mb-4" style={{ color: 'var(--cream-subtle)' }}>
           Last updated: {lastPoll.toLocaleTimeString()}
         </p>
@@ -72,7 +87,15 @@ export default function Dashboard() {
         </div>
       )}
 
-      {loading ? (
+      {!isLive ? (
+        <div className="card text-center py-20 flex flex-col items-center justify-center animate-fade-in" style={{ background: 'rgba(var(--glass-color), 0.02)', borderColor: 'var(--border)' }}>
+          <span className="text-6xl mb-6 select-none animate-bounce" style={{ animationDuration: '3s' }}>💤</span>
+          <h2 className="text-2xl font-black mb-3" style={{ color: 'var(--cream)' }}>Kitchen Feed Offline</h2>
+          <p className="max-w-md text-sm leading-relaxed" style={{ color: 'var(--cream-muted)' }}>
+            You have toggled your live status to offline. Customers cannot submit new orders to you, and all active preparing screens are paused. Toggle the status above to go Live again.
+          </p>
+        </div>
+      ) : loading ? (
         <div className="flex justify-center py-20">
           <div className="spinner-lg" />
         </div>
