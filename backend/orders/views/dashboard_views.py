@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
+from ..permissions import IsChef
 
 from ..models import Order
 from ..serializers import OrderSerializer
@@ -14,10 +15,10 @@ class DashboardViewSet(viewsets.ReadOnlyModelViewSet):
 
     Only returns orders with status `in_progress` or `ready`.
     Delivered and cancelled orders are intentionally excluded.
-    Requires authentication.
+    Requires chef authentication.
     """
     serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsChef]
 
     def get_queryset(self):
         if not is_kitchen_staff(self.request.user):

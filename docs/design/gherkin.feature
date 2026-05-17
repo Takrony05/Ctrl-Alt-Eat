@@ -1,27 +1,38 @@
 Feature: Kitchen Display System (KDS)
-  As a customer or chef, I want a reliable ordering and status tracking system.
+  As a Chef
+  I want to see and manage active orders
+  So that I can prepare them in the correct priority and notify customers when ready
 
-  Scenario: Customer places a valid order
-    Given the customer is authenticated
-    And the menu is loaded
-    When the customer adds items to the cart
-    And the customer submits the order for table 5
-    Then the order status should be "in_progress"
-    And the order should appear on the Chef Dashboard
+  Background:
+    Given I am logged in as a "Chef"
 
-  Scenario: Chef marks an order as ready
-    Given there is an "in_progress" order for table 5
-    When the chef marks the order as "ready"
+  Scenario: KDS-01 View active orders
+    Given there are orders with status "in_progress" or "ready"
+    When I view the kitchen dashboard
+    Then I should see all active orders as distinct cards
+
+  Scenario: KDS-02 FIFO ordering
+    Given Order #15 was created at 12:00 PM
+    And Order #16 was created at 12:05 PM
+    When I view the dashboard
+    Then Order #15 should appear before Order #16
+
+  Scenario: KDS-03 Status transition (Mark as Ready)
+    Given Order #15 has status "in_progress"
+    When I click "Mark as Ready" on Order #15
     Then the order status should update to "ready"
     And the customer should receive a notification
 
-  Scenario: Unauthorized access to Chef Dashboard
-    Given a user with "customer" role
-    When the user attempts to access the Chef Dashboard API
-    Then the response should be "403 Forbidden"
+  Scenario: KDS-04 Empty dashboard
+    Given there are no orders with status "in_progress" or "ready"
+    When I view the dashboard
+    Then I should see the message "No active orders right now."
 
-  Scenario: Order placement with invalid items
-    Given the customer is authenticated
-    When the customer submits an order with a non-existent menu item
-    Then the response should indicate an error
-    And no order should be created
+  Scenario: KDS-05 Failed backend response
+    Given the server is experiencing an error
+    When I attempt to update an order status
+    Then I should see an error notification "Failed to update status"
+
+  Scenario: KDS-06 Invalid transition rejection
+    Given an order is already marked as "Ready"
+    Then the "Mark as Ready" button should be disabled for that order
