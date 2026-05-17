@@ -2,6 +2,7 @@ from collections import defaultdict
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from asgiref.sync import async_to_sync
@@ -14,6 +15,14 @@ from ..serializers import (
     OrderStatusUpdateSerializer,
     MenuItemSerializer,
 )
+
+
+def is_kitchen_staff(user):
+    return (
+        user.is_staff
+        or user.is_superuser
+        or getattr(user, 'role', None) in ('chef', 'admin')
+    )
 
 
 class MenuItemViewSet(viewsets.ReadOnlyModelViewSet):
@@ -52,7 +61,7 @@ class OrderViewSet(viewsets.ModelViewSet):
 
         user = self.request.user
         # Staff, superusers, and chefs see all orders (needed for KDS / Dashboard)
-        if user.is_staff or user.is_superuser or getattr(user, 'role', None) == 'chef':
+        if is_kitchen_staff(user):
             return qs.all()
 
         # Regular customers only see their own orders
@@ -70,6 +79,9 @@ class OrderViewSet(viewsets.ModelViewSet):
         return order
 
     def create(self, request, *args, **kwargs):
+        if getattr(request.user, 'role', None) != 'customer':
+            raise PermissionDenied("Only customers can place orders from the menu.")
+
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         order = serializer.save(created_by=request.user)
@@ -79,9 +91,28 @@ class OrderViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         """PATCH /api/orders/{id}/ — Chef updates order status."""
+        if not is_kitchen_staff(request.user):
+            raise PermissionDenied("Only kitchen staff can update order status.")
+
         order = self.get_object()
         serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        next_status = serializer.validated_data.get('order_status')
+
+        allowed_transitions = {
+            Order.Status.IN_PROGRESS: {Order.Status.READY, Order.Status.CANCELLED},
+            Order.Status.READY: {Order.Status.DELIVERED, Order.Status.CANCELLED},
+            Order.Status.DELIVERED: set(),
+            Order.Status.CANCELLED: set(),
+        }
+
+        if next_status and next_status != order.order_status:
+            allowed_next = allowed_transitions.get(order.order_status, set())
+            if next_status not in allowed_next:
+                raise ValidationError({
+                    'order_status': f"Cannot change status from {order.order_status} to {next_status}."
+                })
+
         order = serializer.save()  # re-assign to get fresh instance
 
         # Broadcast WebSocket event when order becomes ready

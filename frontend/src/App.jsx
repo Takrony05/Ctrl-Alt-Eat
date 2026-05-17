@@ -46,8 +46,7 @@ function AppInner() {
   const handleOrderReady = useCallback((event) => {
     // Only show toast if this customer placed the order
     if (!user) return;
-    if (user.role === 'customer') {
-      // Show if the order belongs to this customer or role is customer (broadcast)
+    if (user.role === 'customer' && Number(event.customer_id) === Number(user.id)) {
       const id = Date.now();
       setToasts((prev) => [
         ...prev,

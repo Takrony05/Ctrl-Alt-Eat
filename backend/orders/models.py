@@ -55,6 +55,7 @@ class MenuItem(models.Model):
         validators=[MinValueValidator(0.00)]
     )
     available_addons = models.ManyToManyField(AddOn, blank=True, related_name="menu_items")
+    image_url        = models.URLField(max_length=500, blank=True, default="")
     created_at       = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

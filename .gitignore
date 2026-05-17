@@ -9,3 +9,5 @@ backend/static/
 .vscode/
 .idea/
 *.log
+venv/
+
