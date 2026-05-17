@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -20,6 +20,7 @@ import OrderTrackingPage  from './pages/OrderTrackingPage';
 
 import { useOrderSocket } from './hooks/useOrderSocket';
 import ReadyNotification from './components/ReadyNotification';
+import { getOrders } from './services/api';
 
 // ─── Protected Route wrapper ──────────────────────────────
 function ProtectedRoute({ children, allowedRoles }) {
@@ -59,6 +60,52 @@ function AppInner() {
   }, [user]);
 
   useOrderSocket(handleOrderReady);
+
+  const notifiedOrdersRef = useRef(new Set());
+  const isFirstCheckRef = useRef(true);
+
+  // Background polling fallback for order readiness (in case WebSockets are blocked/not working)
+  useEffect(() => {
+    if (!user || user.role !== 'customer') return;
+
+    const checkActiveOrders = async () => {
+      try {
+        const res = await getOrders();
+        const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+        
+        // Find any order that is ready
+        const readyOrders = data.filter(o => o.order_status === 'ready' || o.status === 'ready');
+        
+        readyOrders.forEach(order => {
+          if (!notifiedOrdersRef.current.has(order.id)) {
+            // First time seeing this order marked ready, register it
+            notifiedOrdersRef.current.add(order.id);
+            
+            // Only trigger popup/toast if this is not the initial load check
+            if (!isFirstCheckRef.current) {
+              setShowGlobalReady(true);
+              
+              const toastId = Date.now() + order.id;
+              setToasts((prev) => [
+                ...prev,
+                { id: toastId, message: `Order #${order.id} is ready to be picked up!` },
+              ]);
+            }
+          }
+        });
+        
+        // Mark that the initial load check is completed
+        isFirstCheckRef.current = false;
+      } catch (err) {
+        console.error('Background order check error:', err);
+      }
+    };
+
+    checkActiveOrders();
+    const interval = setInterval(checkActiveOrders, 5000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const dismissToast = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
