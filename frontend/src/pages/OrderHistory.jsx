@@ -25,7 +25,10 @@ export default function OrderHistory() {
 
   useEffect(() => {
     getOrders()
-      .then((res) => setOrders(Array.isArray(res.data) ? res.data : res.data.results || []))
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : res.data.results || [];
+        setOrders(data.sort((a, b) => b.id - a.id));
+      })
       .catch(() => setError('Failed to load order history.'))
       .finally(() => setLoading(false));
   }, []);
