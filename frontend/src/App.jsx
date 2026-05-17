@@ -19,6 +19,7 @@ import CheckoutPage       from './pages/CheckoutPage';
 import OrderTrackingPage  from './pages/OrderTrackingPage';
 
 import { useOrderSocket } from './hooks/useOrderSocket';
+import ReadyNotification from './components/ReadyNotification';
 
 // ─── Protected Route wrapper ──────────────────────────────
 function ProtectedRoute({ children, allowedRoles }) {
@@ -42,9 +43,10 @@ function ProtectedRoute({ children, allowedRoles }) {
 function AppInner() {
   const { user } = useAuth();
   const [toasts, setToasts] = useState([]);
+  const [showGlobalReady, setShowGlobalReady] = useState(false);
 
   const handleOrderReady = useCallback((event) => {
-    // Only show toast if this customer placed the order
+    // Only show toast and modal if this customer placed the order
     if (!user) return;
     if (user.role === 'customer' && Number(event.customer_id) === Number(user.id)) {
       const id = Date.now();
@@ -52,6 +54,7 @@ function AppInner() {
         ...prev,
         { id, message: event.message || 'Your order is ready!' },
       ]);
+      setShowGlobalReady(true);
     }
   }, [user]);
 
@@ -130,6 +133,10 @@ function AppInner() {
           />
         ))}
       </div>
+
+      {showGlobalReady && (
+        <ReadyNotification onDismiss={() => setShowGlobalReady(false)} />
+      )}
     </div>
   );
 }
